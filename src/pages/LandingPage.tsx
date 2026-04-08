@@ -145,15 +145,18 @@ const LandingPage: React.FC = () => {
                     padding: '10px 0'
                 }}
             >
-                {/* Logo Section - More compact */}
-                <div className="animate-float" style={{ marginBottom: '8px' }}>
+                {/* Logo Section - Intelligent & Larger */}
+                <div className="animate-float" style={{ marginBottom: '-10px', marginTop: '-15px', zIndex: 10 }}>
                     <img
                         src={logo}
                         alt="Gallinas y Pollos Aliñados"
                         style={{
-                            width: '110px',
+                            width: '150px',
                             height: 'auto',
-                            filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.1))'
+                            display: 'block',
+                            filter: 'drop-shadow(0 15px 25px rgba(255,122,0,0.25))',
+                            transform: 'scale(1.05)',
+                            pointerEvents: 'none'
                         }}
                     />
                 </div>
