@@ -156,3 +156,12 @@ export async function clearOrphanTickets(_req: Request, res: Response) {
         res.status(500).json({ success: false, error: err.message });
     }
 }
+
+export async function testDatabase(_req: Request, res: Response) {
+    try {
+        const count = await prisma.polleriaTicket.count();
+        res.json({ success: true, count });
+    } catch (err: any) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+}
