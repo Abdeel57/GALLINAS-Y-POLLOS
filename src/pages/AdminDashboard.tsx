@@ -38,7 +38,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     const loadCodes = async () => {
         setCodesLoading(true);
         try {
-            const res = await fetch(`${API}/api/promo-codes`, { headers: promoHeaders });
+            const res = await fetch(`${API}/api/promo-codes/`, { headers: promoHeaders });
             const json = await res.json();
             if (json.success) setCodes(json.data);
         } catch { /* noop */ } finally { setCodesLoading(false); }
@@ -51,7 +51,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         setCreateError('');
         setCreateLoading(true);
         try {
-            const res = await fetch(`${API}/api/promo-codes`, {
+            const res = await fetch(`${API}/api/promo-codes/`, {
                 method: 'POST',
                 headers: promoHeaders,
                 body: JSON.stringify({ code: newCode, maxUses: newMaxUses }),
