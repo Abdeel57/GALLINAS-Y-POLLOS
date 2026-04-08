@@ -49,7 +49,13 @@ export async function createPromoCode(req: Request, res: Response) {
 
 export async function deletePromoCode(req: Request, res: Response) {
     try {
-        await prisma.promoCode.delete({ where: { id: req.params.id } });
+        const { id } = req.params;
+        await prisma.$transaction([
+            // 1. Liberar los boletos asociados a este link/código
+            prisma.polleriaTicket.deleteMany({ where: { promoCodeId: id } }),
+            // 2. Borrar el código promocional
+            prisma.promoCode.delete({ where: { id } })
+        ]);
         res.json({ success: true });
     } catch (err: any) {
         res.status(500).json({ success: false, error: err.message });

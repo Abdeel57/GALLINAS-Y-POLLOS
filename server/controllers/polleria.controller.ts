@@ -92,17 +92,14 @@ export async function getAllOrders(_req: Request, res: Response) {
 
         // Agrupar boletos por cliente (nombre + teléfono)
         const ordersMap = new Map();
-        tickets.forEach(t => {
-            // Saltamos boletos sin dueño si los hubiera (falla de seguridad o test)
-            if (!t.ownerName || t.ownerName === 'Anónimo') return;
-
-            const key = `${t.ownerName}-${t.ownerPhone}`;
+        tickets.forEach((t: any) => {
+            const key = `${t.ownerName || 'Unknown'}-${t.ownerPhone || 'NoPhone'}`;
             if (!ordersMap.has(key)) {
                 ordersMap.set(key, {
                     id: t.id,
-                    name: t.ownerName,
-                    phone: t.ownerPhone,
-                    rancheria: t.ownerRancheria,
+                    name: t.ownerName || 'Reservado (Sin Nombre)',
+                    phone: t.ownerPhone || 'Sin Teléfono',
+                    rancheria: t.ownerRancheria || 'No especificada',
                     tickets: [],
                     date: t.createdAt
                 });
