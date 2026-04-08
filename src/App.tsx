@@ -3,6 +3,7 @@ import LandingPage from './pages/LandingPage';
 import TicketPicker from './pages/TicketPicker';
 import RegistrationForm from './pages/RegistrationForm';
 import SuccessPage from './pages/SuccessPage';
+import TicketView from './pages/TicketView';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminLogin from './pages/AdminLogin';
 
@@ -16,6 +17,7 @@ function App() {
         <Route path="/picker" element={<TicketPicker />} />
         <Route path="/registration" element={<RegistrationForm />} />
         <Route path="/success" element={<SuccessPage />} />
+        <Route path="/ticket" element={<TicketView />} />
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin" element={isAdmin ? <AdminDashboard /> : <AdminLogin />} />
       </Routes>
