@@ -5,9 +5,7 @@ import { Search, ChevronLeft, Info, CheckCircle2 } from 'lucide-react';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 
-const ChickenLeg = () => (
-    <span style={{ fontSize: '18px', lineHeight: 1 }}>🍗</span>
-);
+
 
 const TicketPicker: React.FC = () => {
     const navigate = useNavigate();
