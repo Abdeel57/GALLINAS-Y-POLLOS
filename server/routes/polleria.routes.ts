@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getConfig, updateConfig, getTakenTickets, claimTickets } from '../controllers/polleria.controller.js';
+import { getConfig, updateConfig, getTakenTickets, claimTickets, getAllOrders } from '../controllers/polleria.controller.js';
 
 const router = Router();
 const SECRET = process.env.ADMIN_SECRET || 'pollos-admin-2024';
@@ -13,5 +13,6 @@ router.get('/config', getConfig);
 router.put('/config', checkAdmin, updateConfig);
 router.get('/tickets', getTakenTickets);
 router.post('/tickets', claimTickets);
+router.get('/orders', checkAdmin, getAllOrders);
 
 export default router;

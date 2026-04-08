@@ -52,7 +52,7 @@ export async function getTakenTickets(_req: Request, res: Response) {
 
 export async function claimTickets(req: Request, res: Response) {
     try {
-        const { tickets, ownerName, ownerPhone, promoCode } = req.body;
+        const { tickets, ownerName, ownerPhone, ownerRancheria, promoCode } = req.body;
         if (!Array.isArray(tickets) || tickets.length === 0) {
             return res.status(400).json({ success: false, error: 'Se requieren boletos' });
         }
@@ -71,6 +71,7 @@ export async function claimTickets(req: Request, res: Response) {
                         number,
                         ownerName: ownerName || 'Anónimo',
                         ownerPhone: ownerPhone || '',
+                        ownerRancheria: ownerRancheria || '',
                         promoCodeId: promoId
                     },
                     update: {},
@@ -78,6 +79,38 @@ export async function claimTickets(req: Request, res: Response) {
             )
         );
         res.json({ success: true });
+    } catch (err: any) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+}
+
+export async function getAllOrders(_req: Request, res: Response) {
+    try {
+        const tickets = await prisma.polleriaTicket.findMany({
+            orderBy: { createdAt: 'desc' },
+        });
+
+        // Agrupar boletos por cliente (nombre + teléfono)
+        const ordersMap = new Map();
+        tickets.forEach(t => {
+            // Saltamos boletos sin dueño si los hubiera (falla de seguridad o test)
+            if (!t.ownerName || t.ownerName === 'Anónimo') return;
+
+            const key = `${t.ownerName}-${t.ownerPhone}`;
+            if (!ordersMap.has(key)) {
+                ordersMap.set(key, {
+                    id: t.id,
+                    name: t.ownerName,
+                    phone: t.ownerPhone,
+                    rancheria: t.ownerRancheria,
+                    tickets: [],
+                    date: t.createdAt
+                });
+            }
+            ordersMap.get(key).tickets.push(t.number);
+        });
+
+        res.json({ success: true, data: Array.from(ordersMap.values()) });
     } catch (err: any) {
         res.status(500).json({ success: false, error: err.message });
     }

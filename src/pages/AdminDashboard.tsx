@@ -17,12 +17,18 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     const [copiedLink, setCopiedLink] = useState<string | null>(null);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-    // State for managing orders (Mock Data)
-    const [orders, setOrders] = useState([
-        { id: '1', name: 'Juan Pérez', phone: '987654321', rancheria: 'El Triunfo', tickets: ['05', '10'], date: '2024-04-07' },
-        { id: '2', name: 'María García', phone: '912345678', rancheria: 'La Isla', tickets: ['23', '45'], date: '2024-04-06' },
-        { id: '3', name: 'Roberto Díaz', phone: '955887744', rancheria: 'Pueblo Nuevo', tickets: ['88'], date: '2024-04-05' },
-    ]);
+    // State for managing orders (API real)
+    const [orders, setOrders] = useState<any[]>([]);
+    const [ordersLoading, setOrdersLoading] = useState(false);
+
+    const loadOrders = async () => {
+        setOrdersLoading(true);
+        try {
+            const res = await fetch(`${API}/api/polleria/orders`, { headers: adminHeaders });
+            const json = await res.json();
+            if (json.success) setOrders(json.data);
+        } catch { /* noop */ } finally { setOrdersLoading(false); }
+    };
 
     const [editingOrder, setEditingOrder] = useState<any>(null);
 
@@ -44,7 +50,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         } catch { /* noop */ } finally { setCodesLoading(false); }
     };
 
-    useEffect(() => { if (activeTab === 'codes') loadCodes(); }, [activeTab]);
+    useEffect(() => {
+        if (activeTab === 'codes') loadCodes();
+        if (activeTab === 'orders') loadOrders();
+    }, [activeTab]);
 
     const handleCreateCode = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -327,25 +336,31 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {orders.map(o => (
-                                            <tr key={o.id} style={{ borderBottom: '1px solid #f1f3f5' }}>
-                                                <td style={{ padding: '16px 20px' }}>
-                                                    <div style={{ fontWeight: 700, fontSize: '14px' }}>{o.name}</div>
-                                                    <div style={{ fontSize: '12px', color: '#999' }}>{o.phone}</div>
-                                                </td>
-                                                <td style={{ padding: '16px 20px', fontSize: '13px', color: '#666' }}>{o.rancheria}</td>
-                                                <td style={{ padding: '16px 20px' }}>
-                                                    <div style={{ display: 'flex', gap: '4px' }}>
-                                                        {o.tickets.map(t => (
-                                                            <span key={t} style={{ padding: '2px 6px', background: 'var(--primary-glow)', color: 'var(--primary)', borderRadius: '4px', fontSize: '11px', fontWeight: 800 }}>#{t}</span>
-                                                        ))}
-                                                    </div>
-                                                </td>
-                                                <td style={{ padding: '16px 20px', textAlign: 'right' }}>
-                                                    <button onClick={() => setEditingOrder(o)} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer' }}><Edit2 size={16} /></button>
-                                                </td>
-                                            </tr>
-                                        ))}
+                                        {ordersLoading ? (
+                                            <tr><td colSpan={4} style={{ padding: '40px', textAlign: 'center', color: '#999' }}><Loader size={24} style={{ animation: 'spin 1s linear infinite' }} /></td></tr>
+                                        ) : orders.length === 0 ? (
+                                            <tr><td colSpan={4} style={{ padding: '40px', textAlign: 'center', color: '#aaa' }}>No hay órdenes registradas</td></tr>
+                                        ) : (
+                                            orders.map(o => (
+                                                <tr key={o.id} style={{ borderBottom: '1px solid #f1f3f5' }}>
+                                                    <td style={{ padding: '16px 20px' }}>
+                                                        <div style={{ fontWeight: 700, fontSize: '14px' }}>{o.name}</div>
+                                                        <div style={{ fontSize: '12px', color: '#999' }}>{o.phone}</div>
+                                                    </td>
+                                                    <td style={{ padding: '16px 20px', fontSize: '13px', color: '#666' }}>{o.rancheria}</td>
+                                                    <td style={{ padding: '16px 20px' }}>
+                                                        <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                                                            {o.tickets.map((t: string) => (
+                                                                <span key={t} style={{ padding: '2px 6px', background: 'var(--primary-glow)', color: 'var(--primary)', borderRadius: '4px', fontSize: '11px', fontWeight: 800 }}>#{t}</span>
+                                                            ))}
+                                                        </div>
+                                                    </td>
+                                                    <td style={{ padding: '16px 20px', textAlign: 'right' }}>
+                                                        <button onClick={() => setEditingOrder(o)} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer' }}><Edit2 size={16} /></button>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
                                     </tbody>
                                 </table>
                             </div>
