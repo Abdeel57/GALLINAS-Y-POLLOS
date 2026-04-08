@@ -16,7 +16,7 @@ const TicketPicker: React.FC = () => {
     const [maxTickets, setMaxTickets] = useState(2);
     const [selectedTickets, setSelectedTickets] = useState<string[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
-    const [totalTickets, setTotalTickets] = useState(100);
+    const [totalTickets, setTotalTickets] = useState(0);
     // Cambiamos Set por Map para guardar { numero: nombre }
     const [takenData, setTakenData] = useState<Map<string, string>>(new Map());
 
@@ -78,7 +78,7 @@ const TicketPicker: React.FC = () => {
 
     // Random: excluir tomados, asignar disponibles al azar
     useEffect(() => {
-        if (type !== 'random' || totalTickets === 100) return;
+        if (type !== 'random' || totalTickets === 0) return;
         const available = allTickets.filter(n => !takenData.has(n));
         const shuffled = [...available].sort(() => 0.5 - Math.random());
         const selected = shuffled.slice(0, maxTickets);
