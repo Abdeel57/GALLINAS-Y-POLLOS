@@ -320,9 +320,26 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
 
                     {activeTab === 'orders' && (
                         <div>
-                            <header style={{ marginBottom: '32px' }}>
-                                <h2 style={{ fontSize: '28px', fontWeight: 900 }}>Órdenes</h2>
-                                <p style={{ color: '#666' }}>Gestionar participantes</p>
+                            <header style={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+                                <div>
+                                    <h2 style={{ fontSize: '28px', fontWeight: 900 }}>Órdenes</h2>
+                                    <p style={{ color: '#666' }}>Gestionar participantes y boletos reales</p>
+                                </div>
+                                <button
+                                    onClick={async () => {
+                                        if (!confirm('¿Liberar boletos que no tienen nombre de cliente? (Anónimos)')) return;
+                                        try {
+                                            const res = await fetch(`${API}/api/polleria/cleanup`, { method: 'DELETE', headers: adminHeaders });
+                                            const json = await res.json();
+                                            alert(`Se liberaron ${json.deletedCount || 0} boletos.`);
+                                            loadOrders();
+                                        } catch { alert('Error al limpiar'); }
+                                    }}
+                                    className="btn-secondary"
+                                    style={{ padding: '10px 16px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '8px', color: '#e67e22', borderColor: '#ffe0b2' }}
+                                >
+                                    <Trash2 size={16} /> LIBERAR BOLETOS SIN DUEÑO
+                                </button>
                             </header>
 
                             <div className="table-container premium-card" style={{ padding: 0, overflow: 'hidden', background: 'white', border: 'none' }}>

@@ -74,7 +74,12 @@ export async function claimTickets(req: Request, res: Response) {
                         ownerRancheria: ownerRancheria || '',
                         promoCodeId: promoId
                     },
-                    update: {},
+                    update: {
+                        ownerName: ownerName || 'Anónimo',
+                        ownerPhone: ownerPhone || '',
+                        ownerRancheria: ownerRancheria || '',
+                        promoCodeId: promoId
+                    },
                 })
             )
         );
@@ -108,6 +113,23 @@ export async function getAllOrders(_req: Request, res: Response) {
         });
 
         res.json({ success: true, data: Array.from(ordersMap.values()) });
+    } catch (err: any) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+}
+
+export async function clearOrphanTickets(_req: Request, res: Response) {
+    try {
+        const deleted = await prisma.polleriaTicket.deleteMany({
+            where: {
+                OR: [
+                    { ownerName: 'Anónimo' },
+                    { ownerName: '' },
+                    { ownerName: null as any }
+                ]
+            }
+        });
+        res.json({ success: true, deletedCount: deleted.count });
     } catch (err: any) {
         res.status(500).json({ success: false, error: err.message });
     }

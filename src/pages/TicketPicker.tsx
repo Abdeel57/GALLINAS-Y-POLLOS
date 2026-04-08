@@ -39,7 +39,20 @@ const TicketPicker: React.FC = () => {
             fetch(`${API}/api/promo-codes/validate/${encodeURIComponent(code)}`)
                 .then(r => r.json())
                 .then(json => {
-                    if (json.valid) setMaxTickets(json.ticketsCount || 2);
+                    if (json.valid) {
+                        setMaxTickets(json.ticketsCount || 2);
+                    } else if (json.reason === 'exhausted' && json.canjeado && json.tickets?.length > 0) {
+                        // El código ya se usó, mandar directo al boleto digital
+                        const firstTicket = json.tickets[0];
+                        navigate('/success', {
+                            state: {
+                                name: firstTicket.ownerName,
+                                phone: firstTicket.ownerPhone,
+                                rancheria: firstTicket.ownerRancheria || '',
+                                tickets: json.tickets.map((t: any) => t.number)
+                            }
+                        });
+                    }
                 })
                 .catch(() => { });
         }
