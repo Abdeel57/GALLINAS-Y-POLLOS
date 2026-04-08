@@ -95,15 +95,15 @@ const LandingPage: React.FC = () => {
 
     return (
         <div style={{
-            height: '100vh',
+            minHeight: '100dvh',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '16px',
+            padding: '12px',
             textAlign: 'center',
             position: 'relative',
-            overflow: 'hidden',
+            overflowX: 'hidden',
             background: '#ffffff'
         }}>
             {/* Professional Light Glows (Orange & Blue) */}
@@ -141,16 +141,17 @@ const LandingPage: React.FC = () => {
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'center',
-                    alignItems: 'center'
+                    alignItems: 'center',
+                    padding: '10px 0'
                 }}
             >
-                {/* Logo Section - Reduced size */}
-                <div className="animate-float" style={{ marginBottom: '12px' }}>
+                {/* Logo Section - More compact */}
+                <div className="animate-float" style={{ marginBottom: '8px' }}>
                     <img
                         src={logo}
                         alt="Gallinas y Pollos Aliñados"
                         style={{
-                            width: '140px',
+                            width: '110px',
                             height: 'auto',
                             filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.1))'
                         }}
@@ -162,28 +163,28 @@ const LandingPage: React.FC = () => {
                     initial={{ opacity: 0, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.15 }}
-                    style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '16px' }}
+                    style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px' }}
                 >
                     <div style={{
                         background: 'linear-gradient(135deg, #ff7a00, #ffb347)',
                         color: 'white',
-                        fontSize: '9px',
+                        fontSize: '8px',
                         fontWeight: 900,
-                        letterSpacing: '3px',
-                        padding: '5px 18px',
+                        letterSpacing: '2px',
+                        padding: '3px 14px',
                         borderRadius: '20px',
-                        marginBottom: '14px',
+                        marginBottom: '8px',
                         boxShadow: '0 4px 14px rgba(255,122,0,0.45)',
                         textTransform: 'uppercase'
                     }}>
                         🏆 PREMIO MAYOR
                     </div>
 
-                    {/* Imagen del premio real en 1:1 */}
+                    {/* Imagen del premio real en 1:1 - Slightly smaller */}
                     <div style={{
-                        width: '210px',
-                        height: '210px',
-                        borderRadius: '24px',
+                        width: '180px',
+                        height: '180px',
+                        borderRadius: '20px',
                         overflow: 'hidden',
                         position: 'relative',
                         boxShadow: '0 20px 40px rgba(255,122,0,0.25), 0 0 25px rgba(255,122,0,0.4)',
@@ -195,7 +196,7 @@ const LandingPage: React.FC = () => {
                             <img src={config.prizeImage} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         ) : (
                             <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#111' }}>
-                                <Shuffle size={48} color="rgba(255,122,0,0.2)" />
+                                <Shuffle size={40} color="rgba(255,122,0,0.2)" />
                             </div>
                         )}
                         <div style={{
@@ -205,10 +206,11 @@ const LandingPage: React.FC = () => {
                     </div>
 
                     <h2 style={{
-                        marginTop: '14px',
-                        fontSize: '18px',
+                        marginTop: '10px',
+                        fontSize: '15px',
+                        lineHeight: 1.2,
                         fontWeight: 900,
-                        letterSpacing: '-0.5px',
+                        letterSpacing: '-0.3px',
                         background: 'linear-gradient(135deg, #ff7a00, #ffb347)',
                         WebkitBackgroundClip: 'text',
                         WebkitTextFillColor: 'transparent',
@@ -217,9 +219,9 @@ const LandingPage: React.FC = () => {
                         {config?.prizeName || 'Nombre del Premio'}
                     </h2>
 
-                    {/* ── CONTADOR DE TIEMPO ── */}
+                    {/* ── CONTADOR DE TIEMPO - Compact ── */}
                     {config?.showCountdown && timeLeft && (
-                        <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                        <div style={{ display: 'flex', gap: '6px', marginTop: '8px' }}>
                             {[
                                 { v: timeLeft.d, l: 'DÍAS' },
                                 { v: timeLeft.h, l: 'HORAS' },
@@ -228,37 +230,36 @@ const LandingPage: React.FC = () => {
                             ].map((t, idx) => (
                                 <div key={idx} style={{ textAlign: 'center' }}>
                                     <div style={{
-                                        width: '42px', height: '42px',
-                                        background: '#1a1a1a', borderRadius: '10px',
+                                        width: '38px', height: '38px',
+                                        background: '#1a1a1a', borderRadius: '8px',
                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        fontSize: '16px', fontWeight: 900, color: 'white',
+                                        fontSize: '14px', fontWeight: 900, color: 'white',
                                         boxShadow: '0 4px 10px rgba(0,0,0,0.2)'
                                     }}>
                                         {t.v.toString().padStart(2, '0')}
                                     </div>
-                                    <div style={{ fontSize: '8px', fontWeight: 800, color: '#999', marginTop: '4px', letterSpacing: '0.5px' }}>{t.l}</div>
+                                    <div style={{ fontSize: '7px', fontWeight: 800, color: '#999', marginTop: '2px', letterSpacing: '0.5px' }}>{t.l}</div>
                                 </div>
                             ))}
                         </div>
                     )}
                 </motion.div>
 
-                {/* Text Section - con degradado blanco para legibilidad */}
+                {/* Text Section - Mas compacto */}
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.3 }}
                     style={{
-                        background: 'linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.92) 18%, rgba(255,255,255,1) 45%)',
-                        padding: '12px 24px 0',
+                        padding: '0 24px',
                         borderRadius: '16px',
                         width: '100%',
                     }}
                 >
                     <h1 style={{
-                        fontSize: 'clamp(22px, 6vw, 30px)',
+                        fontSize: 'clamp(18px, 5vw, 24px)',
                         fontWeight: 900,
-                        marginBottom: '6px',
+                        marginBottom: '4px',
                         color: 'var(--text-main)',
                         letterSpacing: '-0.5px',
                         lineHeight: 1.1
@@ -267,10 +268,10 @@ const LandingPage: React.FC = () => {
                     </h1>
 
                     <p style={{
-                        fontSize: '14px',
+                        fontSize: '13px',
                         color: 'var(--text-muted)',
-                        marginBottom: '28px',
-                        lineHeight: 1.4
+                        marginBottom: '16px',
+                        lineHeight: 1.3
                     }}>
                         Canjea tus boletos para la gran <br />
                         <span style={{ color: 'var(--primary)', fontWeight: 800 }}>RÍOS DE AGUA VIVA</span>
@@ -278,21 +279,21 @@ const LandingPage: React.FC = () => {
                 </motion.div>
 
                 {/* Buttons Section */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', maxWidth: '280px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', maxWidth: '280px', marginTop: '4px' }}>
                     {codeStatus === 'loading' && (
-                        <div style={{ display: 'flex', justifyContent: 'center', padding: '16px' }}>
-                            <Loader size={28} color="var(--primary)" style={{ animation: 'spin 1s linear infinite' }} />
+                        <div style={{ display: 'flex', justifyContent: 'center', padding: '12px' }}>
+                            <Loader size={24} color="var(--primary)" style={{ animation: 'spin 1s linear infinite' }} />
                         </div>
                     )}
 
                     {codeStatus === 'invalid' && (
                         <div style={{
-                            display: 'flex', alignItems: 'center', gap: '10px',
+                            display: 'flex', alignItems: 'center', gap: '8px',
                             background: '#fff0f0', border: '1px solid #fcc', borderRadius: '12px',
-                            padding: '14px 16px', color: '#c0392b'
+                            padding: '12px 16px', color: '#c0392b'
                         }}>
-                            <AlertCircle size={20} style={{ flexShrink: 0 }} />
-                            <span style={{ fontSize: '13px', fontWeight: 600 }}>{codeError}</span>
+                            <AlertCircle size={18} style={{ flexShrink: 0 }} />
+                            <span style={{ fontSize: '12px', fontWeight: 600 }}>{codeError}</span>
                         </div>
                     )}
 
@@ -302,18 +303,18 @@ const LandingPage: React.FC = () => {
                                 whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                                 onClick={() => navigate(`/picker?type=random&code=${code}`)}
                                 className="btn-primary"
-                                style={{ width: '100%', padding: '14px' }}
+                                style={{ width: '100%', padding: '12px', fontSize: '14px' }}
                             >
-                                <Shuffle size={18} /> AL AZAR
+                                <Shuffle size={16} /> AL AZAR
                             </motion.button>
 
                             <motion.button
                                 whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                                 onClick={() => navigate(`/picker?type=choose&code=${code}`)}
                                 className="btn-secondary"
-                                style={{ width: '100%', padding: '14px', display: 'flex', gap: '10px', justifyContent: 'center', alignItems: 'center' }}
+                                style={{ width: '100%', padding: '12px', fontSize: '14px', display: 'flex', gap: '8px', justifyContent: 'center', alignItems: 'center' }}
                             >
-                                <Ticket size={18} /> ELEGIR BOLETOS
+                                <Ticket size={16} /> ELEGIR BOLETOS
                             </motion.button>
                         </>
                     )}
