@@ -37,6 +37,27 @@ body {
   font-family: var(--font-main);
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
+  width: 100%;
+}
+
+/* --- Mejoras para Móviles --- */
+@media (max-width: 768px) {
+
+  input,
+  select,
+  textarea,
+  .glass-input {
+    font-size: 16px !important;
+    /* Evita que iOS haga zoom automático al enfocar */
+  }
+}
+
+button,
+a,
+.btn-primary,
+.btn-secondary {
+  touch-action: manipulation;
+  /* Elimina el retraso de 300ms en el toque */
 }
 
 h1,
