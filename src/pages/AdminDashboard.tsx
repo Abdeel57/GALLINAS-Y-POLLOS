@@ -62,7 +62,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
             setNewCode('');
             setNewMaxUses(1);
             setShowCreateForm(false);
-        } catch { setCreateError('Error de conexión'); } finally { setCreateLoading(false); }
+        } catch (err: any) {
+            console.error('Create code error:', err);
+            setCreateError('Error de conexión: ' + (err.message || 'No se pudo contactar con el servidor'));
+        } finally { setCreateLoading(false); }
     };
 
     const handleDeleteCode = async (id: string) => {
