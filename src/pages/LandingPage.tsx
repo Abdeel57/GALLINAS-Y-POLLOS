@@ -32,16 +32,20 @@ const LandingPage: React.FC = () => {
             .then(json => {
                 if (json.valid) {
                     setCodeStatus('valid');
-                } else if (json.canjeado) {
+                } else if (json.canjeado && json.tickets?.length > 0) {
                     // Si ya se usó, lo llevamos a ver su boleto digital
                     navigate('/ticket', {
                         state: {
-                            name: json.tickets[0].ownerName,
-                            phone: json.tickets[0].ownerPhone,
+                            name: json.tickets[0]?.ownerName || 'Cliente',
+                            phone: json.tickets[0]?.ownerPhone || '',
                             tickets: json.tickets.map((t: any) => t.number),
-                            date: new Date().toLocaleDateString()
+                            date: new Date(json.tickets[0]?.createdAt || Date.now()).toLocaleDateString()
                         }
                     });
+                } else if (json.canjeado) {
+                    // Se canjeó pero no hay boletos (error de sincro)
+                    setCodeStatus('invalid');
+                    setCodeError('El link ya fue usado pero no se encontraron boletos.');
                 } else {
                     setCodeStatus('invalid');
                     const msgs: Record<string, string> = {

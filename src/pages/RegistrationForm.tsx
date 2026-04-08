@@ -43,13 +43,6 @@ const RegistrationForm: React.FC = () => {
             });
         } catch { /* noop */ }
 
-        // Canjear el código si existe
-        if (code) {
-            try {
-                await fetch(`${API}/api/promo-codes/redeem/${encodeURIComponent(code)}`, { method: 'POST' });
-            } catch { /* noop */ }
-        }
-
         navigate('/success', { state: { ...form, tickets } });
         setSubmitting(false);
     };

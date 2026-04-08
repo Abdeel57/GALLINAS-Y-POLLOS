@@ -63,9 +63,10 @@ export async function claimTickets(req: Request, res: Response) {
             if (promo) promoId = promo.id;
         }
 
-        await prisma.$transaction(
-            tickets.map((number: string) =>
-                prisma.polleriaTicket.upsert({
+        await prisma.$transaction(async (tx) => {
+            // 1. Upsert de cada boleto solicitado
+            for (const number of tickets) {
+                await tx.polleriaTicket.upsert({
                     where: { number },
                     create: {
                         number,
@@ -80,9 +81,24 @@ export async function claimTickets(req: Request, res: Response) {
                         ownerRancheria: ownerRancheria || '',
                         promoCodeId: promoId
                     },
-                })
-            )
-        );
+                });
+            }
+
+            // 2. Si hay un código, lo canjeamos automáticamente aquí para evitar desincronización
+            if (promoId) {
+                const promo = await tx.promoCode.findUnique({ where: { id: promoId } });
+                if (promo && promo.active && promo.uses < promo.maxUses) {
+                    const updated = await tx.promoCode.update({
+                        where: { id: promoId },
+                        data: { uses: { increment: 1 } }
+                    });
+                    // Desactivar si llegó al máximo
+                    if (updated.uses >= updated.maxUses) {
+                        await tx.promoCode.update({ where: { id: promoId }, data: { active: false } });
+                    }
+                }
+            }
+        });
         res.json({ success: true });
     } catch (err: any) {
         res.status(500).json({ success: false, error: err.message });
