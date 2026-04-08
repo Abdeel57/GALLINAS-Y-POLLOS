@@ -30,9 +30,16 @@ app.use(express.json({ limit: '5mb' }));
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
+// Log requests
+app.use((req, res, next) => {
+    console.log(`[API] ${req.method} ${req.url}`);
+    next();
+});
+
 // API routes
 app.use('/api/polleria', polleriaRoutes);
-app.use('/api/promo-codes', promoCodesRoutes);
+app.use('/api/admin-canje', promoCodesRoutes);
+app.use('/api/promo-codes', promoCodesRoutes); // Mantener por compatibilidad con público
 
 // Servir el frontend React (build estático)
 const frontendDist = path.join(__dirname, '..', '..', 'dist');
