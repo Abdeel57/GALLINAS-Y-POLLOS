@@ -32,7 +32,7 @@ const RegistrationForm: React.FC = () => {
 
         // Guardar boletos tomados en el backend
         try {
-            await fetch(`${API}/api/polleria/tickets`, {
+            const resp = await fetch(`${API}/api/polleria/tickets`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -43,7 +43,18 @@ const RegistrationForm: React.FC = () => {
                     promoCode: code
                 }),
             });
-        } catch { /* noop */ }
+            const json = await resp.json();
+            if (!json.success) {
+                alert(`Error: ${json.error || 'No se pudo completar el registro'}`);
+                setSubmitting(false);
+                return;
+            }
+        } catch (err) {
+            console.error('Error de registro:', err);
+            alert('Error de conexión con el servidor. Por favor, intenta de nuevo.');
+            setSubmitting(false);
+            return;
+        }
 
         navigate('/success', { state: { ...form, tickets } });
         setSubmitting(false);

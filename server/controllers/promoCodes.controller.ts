@@ -81,7 +81,9 @@ export async function validatePromoCode(req: Request, res: Response) {
                 tickets: tickets.map(t => ({
                     number: t.number,
                     ownerName: t.ownerName,
-                    ownerPhone: t.ownerPhone
+                    ownerPhone: t.ownerPhone,
+                    ownerRancheria: t.ownerRancheria || '',
+                    createdAt: t.createdAt
                 }))
             });
         }
