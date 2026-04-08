@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Download, Check, Ticket, Home, MapPin, Share2, Loader } from 'lucide-react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Download, Check, Ticket, MapPin, Share2, Loader } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import Confetti from 'react-confetti';
 import logo from '../assets/logo.png';
 
@@ -9,7 +9,6 @@ const RAFFLE_NAME = 'RÍOS DE AGUA VIVA';
 
 const SuccessPage: React.FC = () => {
     const location = useLocation();
-    const navigate = useNavigate();
     const { name, rancheria, tickets } = location.state || { name: 'Participante', rancheria: '', tickets: [] };
     const ticketRef = useRef<HTMLDivElement>(null);
 
@@ -278,18 +277,7 @@ const SuccessPage: React.FC = () => {
                     </motion.div>
                 )}
 
-                <button
-                    onClick={() => navigate('/')}
-                    style={{
-                        marginTop: '20px',
-                        background: 'none', border: 'none', color: '#bbb',
-                        cursor: 'pointer', display: 'flex', alignItems: 'center',
-                        justifyContent: 'center', width: '100%', gap: '8px',
-                        fontSize: '13px', textDecoration: 'underline'
-                    }}
-                >
-                    <Home size={13} /> Volver al Inicio
-                </button>
+
             </motion.div>
 
             <style>{`
