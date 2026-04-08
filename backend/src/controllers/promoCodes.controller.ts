@@ -12,18 +12,33 @@ export async function listPromoCodes(_req: Request, res: Response) {
 
 export async function createPromoCode(req: Request, res: Response) {
     try {
-        const { code, maxUses } = req.body;
-        if (!code || String(code).trim() === '') {
-            return res.status(400).json({ success: false, error: 'El código es requerido' });
+        const { code, maxUses, ticketsCount } = req.body;
+
+        // Generar un código aleatorio si no se proporciona uno
+        const finalCode = code && String(code).trim() !== ''
+            ? String(code).trim().toUpperCase()
+            : Math.random().toString(36).substring(2, 7).toUpperCase();
+
+        const existing = await prisma.promoCode.findUnique({ where: { code: finalCode } });
+        if (existing) {
+            if (code) return res.status(409).json({ success: false, error: 'Ese código ya existe' });
+            // Si el aleatorio falló, intentamos uno con un sufijo
+            const retryCode = finalCode + Math.floor(Math.random() * 10);
+            const promo = await prisma.promoCode.create({
+                data: {
+                    code: retryCode,
+                    maxUses: maxUses ? Number(maxUses) : 1,
+                    ticketsCount: ticketsCount ? Number(ticketsCount) : 1
+                }
+            });
+            return res.status(201).json({ success: true, data: promo });
         }
-        const normalized = String(code).trim().toUpperCase();
-        const existing = await prisma.promoCode.findUnique({ where: { code: normalized } });
-        if (existing) return res.status(409).json({ success: false, error: 'Ese código ya existe' });
+
         const promo = await prisma.promoCode.create({
             data: {
-                code: normalized,
+                code: finalCode,
                 maxUses: maxUses ? Number(maxUses) : 1,
-                ticketsCount: req.body.ticketsCount ? Number(req.body.ticketsCount) : 1
+                ticketsCount: ticketsCount ? Number(ticketsCount) : 1
             }
         });
         res.status(201).json({ success: true, data: promo });

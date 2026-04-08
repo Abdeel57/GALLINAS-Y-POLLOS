@@ -39,7 +39,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     const loadCodes = async () => {
         setCodesLoading(true);
         try {
-            const res = await fetch(`${API}/admin-api/links`, { headers: promoHeaders });
+            const res = await fetch(`${API}/actions/list-v2`, { headers: promoHeaders });
             const json = await res.json();
             if (json.success) setCodes(json.data);
         } catch { /* noop */ } finally { setCodesLoading(false); }
@@ -52,10 +52,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         setCreateError('');
         setCreateLoading(true);
         try {
-            const res = await fetch(`${API}/admin-api/links`, {
+            const res = await fetch(`${API}/actions/create-v2`, {
                 method: 'POST',
                 headers: promoHeaders,
-                body: JSON.stringify({ code: newCode, maxUses: newMaxUses, ticketsCount: newTicketsCount }),
+                body: JSON.stringify({ maxUses: newMaxUses, ticketsCount: newTicketsCount }),
             });
             const json = await res.json();
             if (!json.success) { setCreateError(json.error || 'Error al crear'); return; }
@@ -72,7 +72,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     const handleDeleteCode = async (id: string) => {
         if (!confirm('¿Eliminar este código?')) return;
         try {
-            await fetch(`${API}/admin-api/links/${id}`, { method: 'DELETE', headers: promoHeaders });
+            await fetch(`${API}/actions/delete-v2/${id}`, { method: 'DELETE', headers: promoHeaders });
             setCodes(prev => prev.filter(c => c.id !== id));
         } catch { /* noop */ }
     };
@@ -371,21 +371,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                 {showCreateForm && (
                                     <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
                                         className="premium-card" style={{ background: 'white', border: '2px solid var(--primary-glow)', marginBottom: '24px', padding: '24px' }}>
-                                        <h3 style={{ fontWeight: 800, marginBottom: '16px', fontSize: '15px' }}>Crear nuevo link</h3>
+                                        <h3 style={{ fontWeight: 800, marginBottom: '16px', fontSize: '15px' }}>Generar nuevo link de regalo</h3>
                                         <form onSubmit={handleCreateCode} style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
-                                            <div style={{ flex: 2, minWidth: '160px' }}>
-                                                <label style={{ fontSize: '10px', fontWeight: 800, color: '#999', textTransform: 'uppercase', marginBottom: '6px', display: 'block' }}>Código</label>
-                                                <input
-                                                    required
-                                                    type="text"
-                                                    className="glass-input"
-                                                    placeholder="ej: POLLO-GRATIS-01"
-                                                    style={{ background: '#f8f9fa', border: '1px solid #eee', textTransform: 'uppercase' }}
-                                                    value={newCode}
-                                                    onChange={e => setNewCode(e.target.value.toUpperCase())}
-                                                />
-                                            </div>
-                                            <div style={{ flex: 1, minWidth: '100px' }}>
+                                            <div style={{ flex: 1, minWidth: '120px' }}>
                                                 <label style={{ fontSize: '10px', fontWeight: 800, color: '#999', textTransform: 'uppercase', marginBottom: '6px', display: 'block' }}>Boletos</label>
                                                 <input
                                                     required
@@ -410,8 +398,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                                 />
                                             </div>
                                             <div style={{ display: 'flex', gap: '8px' }}>
-                                                <button type="submit" className="btn-primary" style={{ padding: '12px 20px', whiteSpace: 'nowrap' }} disabled={createLoading}>
-                                                    {createLoading ? <Loader size={16} style={{ animation: 'spin 1s linear infinite' }} /> : 'CREAR'}
+                                                <button type="submit" className="btn-primary" style={{ padding: '12px 24px', whiteSpace: 'nowrap', minWidth: '160px' }} disabled={createLoading}>
+                                                    {createLoading ? <Loader size={16} style={{ animation: 'spin 1s linear infinite' }} /> : 'GENERAR LINK'}
                                                 </button>
                                                 <button type="button" onClick={() => setShowCreateForm(false)} style={{ padding: '12px 16px', background: '#f1f3f5', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 700 }}>
                                                     <X size={16} />

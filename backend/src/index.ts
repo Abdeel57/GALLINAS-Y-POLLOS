@@ -44,9 +44,9 @@ const checkAdmin = (req: any, res: any, next: any) => {
     next();
 };
 
-app.get('/admin-api/links', checkAdmin, listPromoCodes);
-app.post('/admin-api/links', checkAdmin, createPromoCode);
-app.delete('/admin-api/links/:id', checkAdmin, deletePromoCode);
+app.get('/actions/list-v2', checkAdmin, listPromoCodes);
+app.post('/actions/create-v2', checkAdmin, createPromoCode);
+app.delete('/actions/delete-v2/:id', checkAdmin, deletePromoCode);
 
 // API routes
 app.use('/api/polleria', polleriaRoutes);
