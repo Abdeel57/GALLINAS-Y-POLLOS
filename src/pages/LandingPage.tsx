@@ -33,11 +33,12 @@ const LandingPage: React.FC = () => {
                 if (json.valid) {
                     setCodeStatus('valid');
                 } else if (json.canjeado && json.tickets?.length > 0) {
-                    // Si ya se usó, lo llevamos a ver su boleto digital
-                    navigate('/ticket', {
+                    // Si ya se usó, lo llevamos a ver su boleto digital (SuccessPage)
+                    navigate('/success', {
                         state: {
                             name: json.tickets[0]?.ownerName || 'Cliente',
                             phone: json.tickets[0]?.ownerPhone || '',
+                            rancheria: json.tickets[0]?.ownerRancheria || '',
                             tickets: json.tickets.map((t: any) => t.number),
                             date: new Date(json.tickets[0]?.createdAt || Date.now()).toLocaleDateString()
                         }

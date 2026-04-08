@@ -111,10 +111,16 @@ export async function getAllOrders(_req: Request, res: Response) {
             orderBy: { createdAt: 'desc' },
         });
 
+        console.log(`[DEBUG] Recuperados ${tickets.length} boletos de la base de datos.`);
+
         // Agrupar boletos por cliente (nombre + teléfono)
         const ordersMap = new Map();
         tickets.forEach((t: any) => {
-            const key = `${t.ownerName || 'Unknown'}-${t.ownerPhone || 'NoPhone'}`;
+            // Usar una clave única basada en nombre y teléfono, o el ID si faltan datos
+            const key = (t.ownerName && t.ownerName !== 'Anónimo')
+                ? `${t.ownerName}-${t.ownerPhone}`
+                : `anon-${t.id}`;
+
             if (!ordersMap.has(key)) {
                 ordersMap.set(key, {
                     id: t.id,
