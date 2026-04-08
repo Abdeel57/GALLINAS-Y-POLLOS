@@ -69,7 +69,12 @@ const TicketPicker: React.FC = () => {
         }
     }, [code, navigate]);
 
-    const allTickets = Array.from({ length: totalTickets }, (_, i) => i.toString().padStart(2, '0'));
+    const allTickets = React.useMemo(() => {
+        const padSize = totalTickets > 0 ? (totalTickets - 1).toString().length : 2;
+        // Aseguramos al menos 2 o 3 dígitos según el estándar de rifas
+        const finalPad = Math.max(padSize, 3);
+        return Array.from({ length: totalTickets }, (_, i) => i.toString().padStart(finalPad, '0'));
+    }, [totalTickets]);
 
     // Random: excluir tomados, asignar disponibles al azar
     useEffect(() => {
@@ -110,7 +115,7 @@ const TicketPicker: React.FC = () => {
                 <div style={{ background: 'var(--primary-glow)', padding: '12px 16px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px', border: '1px solid rgba(255, 122, 0, 0.1)' }}>
                     <Info size={18} color="var(--primary)" />
                     <p style={{ fontSize: '14px', fontWeight: 700, color: 'var(--primary)', margin: 0 }}>
-                        Selecciona {maxTickets} boletos para tu registro oficial.
+                        Selecciona {maxTickets} boletos para tu registro.
                     </p>
                 </div>
 
@@ -118,7 +123,7 @@ const TicketPicker: React.FC = () => {
                     <Search style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#666' }} size={18} />
                     <input
                         type="text"
-                        placeholder="Buscar número (ej. 05)..."
+                        placeholder="Buscar número (ej. 005)..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="glass-input"
