@@ -30,7 +30,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     const [codes, setCodes] = useState<PromoCode[]>([]);
     const [codesLoading, setCodesLoading] = useState(false);
     const [showCreateForm, setShowCreateForm] = useState(false);
-    const [newCode, setNewCode] = useState('');
     const [newMaxUses, setNewMaxUses] = useState(1);
     const [newTicketsCount, setNewTicketsCount] = useState(2);
     const [createError, setCreateError] = useState('');
@@ -60,7 +59,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
             const json = await res.json();
             if (!json.success) { setCreateError(json.error || 'Error al crear'); return; }
             setCodes(prev => [json.data, ...prev]);
-            setNewCode('');
             setNewMaxUses(1);
             setShowCreateForm(false);
         } catch (err: any) {

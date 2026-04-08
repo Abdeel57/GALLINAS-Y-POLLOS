@@ -10,7 +10,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "cd backend && npx prisma migrate deploy && node dist/index.js"
   },
   "dependencies": {
     "@types/canvas-confetti": "^1.9.0",
