@@ -15,7 +15,7 @@ export async function getConfig(_req: Request, res: Response) {
 
 export async function updateConfig(req: Request, res: Response) {
     try {
-        const { prizeName, prizeImage, drawDate, totalTickets } = req.body;
+        const { prizeName, prizeImage, drawDate, totalTickets, showCountdown } = req.body;
         if (totalTickets !== undefined) {
             const current = await prisma.polleriaConfig.findUnique({ where: { id: 'default' } });
             if (current && Number(totalTickets) < current.totalTickets) {
@@ -27,6 +27,7 @@ export async function updateConfig(req: Request, res: Response) {
         if (prizeImage !== undefined) data.prizeImage = prizeImage;
         if (drawDate !== undefined) data.drawDate = new Date(drawDate);
         if (totalTickets !== undefined) data.totalTickets = Number(totalTickets);
+        if (showCountdown !== undefined) data.showCountdown = Boolean(showCountdown);
         const config = await prisma.polleriaConfig.upsert({
             where: { id: 'default' },
             update: data,

@@ -85,7 +85,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     };
 
     // ── Raffle Config ──────────────────────────────────────
-    const [config, setConfig] = useState({ prizeName: '', prizeImage: '', drawDate: '', totalTickets: 100 });
+    const [config, setConfig] = useState({ prizeName: '', prizeImage: '', drawDate: '', totalTickets: 100, showCountdown: true });
     const [configLoading, setConfigLoading] = useState(false);
     const [configSaving, setConfigSaving] = useState(false);
     const [configError, setConfigError] = useState('');
@@ -104,6 +104,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                     prizeImage: d.prizeImage || '',
                     drawDate: d.drawDate ? d.drawDate.split('T')[0] : '',
                     totalTickets: d.totalTickets,
+                    showCountdown: d.showCountdown !== false
                 });
                 setMinTickets(d.totalTickets);
             }
@@ -581,17 +582,84 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                         </div>
 
                                         <div>
-                                            <label style={{ fontSize: '11px', fontWeight: 800, color: '#999', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>
-                                                URL Imagen del Premio (opcional)
+                                            <label style={{ fontSize: '11px', fontWeight: 800, color: '#999', textTransform: 'uppercase', marginBottom: '12px', display: 'block' }}>
+                                                Imagen del Premio (Proporción 1:1)
                                             </label>
-                                            <input
-                                                type="url"
-                                                className="glass-input"
-                                                placeholder="https://..."
-                                                style={{ background: '#f8f9fa', border: '1px solid #eee', color: '#1a1a1a', height: '50px' }}
-                                                value={config.prizeImage}
-                                                onChange={e => setConfig(c => ({ ...c, prizeImage: e.target.value }))}
-                                            />
+                                            <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
+                                                <div
+                                                    onClick={() => document.getElementById('prize-upload')?.click()}
+                                                    style={{
+                                                        width: '120px',
+                                                        height: '120px',
+                                                        borderRadius: '16px',
+                                                        background: '#f8f9fa',
+                                                        border: '2px dashed #ddd',
+                                                        display: 'flex',
+                                                        flexDirection: 'column',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        cursor: 'pointer',
+                                                        overflow: 'hidden',
+                                                        position: 'relative',
+                                                        transition: '0.2s',
+                                                    }}
+                                                >
+                                                    {config.prizeImage ? (
+                                                        <img src={config.prizeImage} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                    ) : (
+                                                        <>
+                                                            <Plus size={24} color="#999" />
+                                                            <span style={{ fontSize: '10px', color: '#999', marginTop: '4px', fontWeight: 800 }}>SUBIR</span>
+                                                        </>
+                                                    )}
+                                                    <input
+                                                        id="prize-upload"
+                                                        type="file"
+                                                        accept="image/*"
+                                                        style={{ display: 'none' }}
+                                                        onChange={(e) => {
+                                                            const file = e.target.files?.[0];
+                                                            if (!file) return;
+                                                            const reader = new FileReader();
+                                                            reader.onload = (event) => {
+                                                                const img = new Image();
+                                                                img.onload = () => {
+                                                                    const canvas = document.createElement('canvas');
+                                                                    const size = Math.min(img.width, img.height);
+                                                                    canvas.width = 1000;
+                                                                    canvas.height = 1000;
+                                                                    const ctx = canvas.getContext('2d');
+                                                                    if (ctx) {
+                                                                        ctx.drawImage(
+                                                                            img,
+                                                                            (img.width - size) / 2, (img.height - size) / 2, size, size,
+                                                                            0, 0, 1000, 1000
+                                                                        );
+                                                                        setConfig(prev => ({ ...prev, prizeImage: canvas.toDataURL('image/jpeg', 0.85) }));
+                                                                    }
+                                                                };
+                                                                img.src = event.target?.result as string;
+                                                            };
+                                                            reader.readAsDataURL(file);
+                                                        }}
+                                                    />
+                                                </div>
+                                                <div style={{ flex: 1 }}>
+                                                    <p style={{ fontSize: '13px', color: '#666', lineHeight: 1.5, margin: 0 }}>
+                                                        <strong style={{ color: '#1a1a1a' }}>Recorte automático activado.</strong><br />
+                                                        Sube cualquier foto y el sistema la ajustará a un formato cuadrado perfecto de alta calidad.
+                                                    </p>
+                                                    {config.prizeImage && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setConfig(prev => ({ ...prev, prizeImage: '' }))}
+                                                            style={{ background: 'none', border: 'none', color: '#e74c3c', fontSize: '11px', fontWeight: 800, padding: 0, marginTop: '8px', cursor: 'pointer' }}
+                                                        >
+                                                            ELIMINAR IMAGEN
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -605,12 +673,40 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                             </label>
                                             <input
                                                 required
-                                                type="date"
+                                                type="datetime-local"
                                                 className="glass-input"
                                                 style={{ background: '#f8f9fa', border: '1px solid #eee', color: '#1a1a1a', height: '50px' }}
                                                 value={config.drawDate}
                                                 onChange={e => setConfig(c => ({ ...c, drawDate: e.target.value }))}
                                             />
+                                        </div>
+
+                                        {/* Contador Switch */}
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '-8px' }}>
+                                            <div
+                                                onClick={() => setConfig(prev => ({ ...prev, showCountdown: !prev.showCountdown }))}
+                                                style={{
+                                                    width: '44px',
+                                                    height: '24px',
+                                                    borderRadius: '12px',
+                                                    background: config.showCountdown ? 'var(--primary)' : '#ddd',
+                                                    position: 'relative',
+                                                    cursor: 'pointer',
+                                                    transition: '0.3s'
+                                                }}
+                                            >
+                                                <div style={{
+                                                    width: '18px',
+                                                    height: '18px',
+                                                    borderRadius: '50%',
+                                                    background: 'white',
+                                                    position: 'absolute',
+                                                    top: '3px',
+                                                    left: config.showCountdown ? '23px' : '3px',
+                                                    transition: '0.3s'
+                                                }} />
+                                            </div>
+                                            <span style={{ fontSize: '13px', fontWeight: 700, color: '#1a1a1a' }}>Mostrar Reloj de Cuenta Regresiva</span>
                                         </div>
 
                                         <div>

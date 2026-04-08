@@ -12,14 +12,44 @@ const LandingPage: React.FC = () => {
     const { code: paramCode } = useParams();
     const code = searchParams.get('code') || paramCode || '';
 
-    const [prizeName, setPrizeName] = useState('Televisor Plasma 75 Pulgadas');
+    const [config, setConfig] = useState<any>(null);
+    const [timeLeft, setTimeLeft] = useState<{ d: number; h: number; m: number; s: number } | null>(null);
 
     useEffect(() => {
         fetch(`${API}/api/polleria/config`)
             .then(r => r.json())
-            .then(json => { if (json.success) setPrizeName(json.data.prizeName); })
+            .then(json => {
+                if (json.success) {
+                    setConfig(json.data);
+                }
+            })
             .catch(() => { });
     }, []);
+
+    useEffect(() => {
+        if (!config?.drawDate || !config?.showCountdown) return;
+
+        const timer = setInterval(() => {
+            const now = new Date().getTime();
+            const target = new Date(config.drawDate).getTime();
+            const diff = target - now;
+
+            if (diff <= 0) {
+                setTimeLeft(null);
+                clearInterval(timer);
+                return;
+            }
+
+            setTimeLeft({
+                d: Math.floor(diff / (1000 * 60 * 60 * 24)),
+                h: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+                m: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
+                s: Math.floor((diff % (1000 * 60)) / 1000)
+            });
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, [config]);
 
     const [codeStatus, setCodeStatus] = useState<'idle' | 'loading' | 'valid' | 'invalid'>('idle');
     const [codeError, setCodeError] = useState('');
@@ -120,112 +150,97 @@ const LandingPage: React.FC = () => {
                         src={logo}
                         alt="Gallinas y Pollos Aliñados"
                         style={{
-                            width: '160px',
+                            width: '140px',
                             height: 'auto',
                             filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.1))'
                         }}
                     />
                 </div>
 
-                {/* ── PREMIO: TV Plasma 75" ── */}
+                {/* ── SECCIÓN PREMIO REAL ── */}
                 <motion.div
                     initial={{ opacity: 0, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.15 }}
-                    style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '10px' }}
+                    style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '16px' }}
                 >
-                    {/* Badge PREMIO MAYOR */}
                     <div style={{
                         background: 'linear-gradient(135deg, #ff7a00, #ffb347)',
                         color: 'white',
-                        fontSize: '10px',
-                        fontWeight: 800,
-                        letterSpacing: '2.5px',
-                        padding: '4px 16px',
+                        fontSize: '9px',
+                        fontWeight: 900,
+                        letterSpacing: '3px',
+                        padding: '5px 18px',
                         borderRadius: '20px',
-                        marginBottom: '10px',
+                        marginBottom: '14px',
                         boxShadow: '0 4px 14px rgba(255,122,0,0.45)',
                         textTransform: 'uppercase'
                     }}>
                         🏆 PREMIO MAYOR
                     </div>
 
-                    {/* TV con efecto naranja */}
+                    {/* Imagen del premio real en 1:1 */}
                     <div style={{
-                        filter: 'drop-shadow(0 0 18px rgba(255,122,0,0.7)) drop-shadow(0 4px 10px rgba(255,122,0,0.3))',
+                        width: '210px',
+                        height: '210px',
+                        borderRadius: '24px',
+                        overflow: 'hidden',
+                        position: 'relative',
+                        boxShadow: '0 20px 40px rgba(255,122,0,0.25), 0 0 25px rgba(255,122,0,0.4)',
+                        border: '2px solid rgba(255,122,0,0.3)',
                         animation: 'float 4s ease-in-out infinite',
+                        background: '#f8f9fa'
                     }}>
-                        <svg width="230" height="138" viewBox="0 0 230 138" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <defs>
-                                <linearGradient id="screenGrad" x1="0" y1="0" x2="1" y2="1">
-                                    <stop offset="0%" stopColor="#1a0a00" />
-                                    <stop offset="45%" stopColor="#0d0d1a" />
-                                    <stop offset="100%" stopColor="#2a1200" />
-                                </linearGradient>
-                                <linearGradient id="screenGlow" x1="0" y1="1" x2="0" y2="0">
-                                    <stop offset="0%" stopColor="#ff7a00" stopOpacity="0.55" />
-                                    <stop offset="60%" stopColor="#ff7a00" stopOpacity="0" />
-                                </linearGradient>
-                                <linearGradient id="frameGrad" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stopColor="#2e2e2e" />
-                                    <stop offset="100%" stopColor="#111111" />
-                                </linearGradient>
-                                <linearGradient id="shineGrad" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stopColor="white" stopOpacity="0.18" />
-                                    <stop offset="100%" stopColor="white" stopOpacity="0" />
-                                </linearGradient>
-                                <radialGradient id="centerGlow" cx="50%" cy="70%" r="50%">
-                                    <stop offset="0%" stopColor="#ff8c00" stopOpacity="0.5" />
-                                    <stop offset="100%" stopColor="#ff8c00" stopOpacity="0" />
-                                </radialGradient>
-                                <filter id="softGlow">
-                                    <feGaussianBlur stdDeviation="2.5" result="blur" />
-                                    <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
-                                </filter>
-                            </defs>
-                            {/* Marco del TV */}
-                            <rect x="4" y="4" width="222" height="114" rx="9" fill="url(#frameGrad)" />
-                            {/* Pantalla */}
-                            <rect x="12" y="12" width="206" height="98" rx="4" fill="url(#screenGrad)" />
-                            {/* Glow naranja inferior */}
-                            <rect x="12" y="12" width="206" height="98" rx="4" fill="url(#screenGlow)" />
-                            {/* Brillo central */}
-                            <rect x="12" y="12" width="206" height="98" rx="4" fill="url(#centerGlow)" />
-                            {/* Brillo superior (shine) */}
-                            <rect x="12" y="12" width="206" height="40" rx="4" fill="url(#shineGrad)" />
-                            {/* Texto 75" en pantalla */}
-                            <text x="115" y="52" textAnchor="middle" fill="#ff9f43" fontSize="30" fontWeight="900" fontFamily="Outfit, sans-serif" filter="url(#softGlow)">75"</text>
-                            {/* Subtexto PLASMA */}
-                            <text x="115" y="74" textAnchor="middle" fill="rgba(255,180,80,0.85)" fontSize="11" fontWeight="700" fontFamily="Outfit, sans-serif" letterSpacing="4">PLASMA</text>
-                            {/* Líneas decorativas de la pantalla */}
-                            <line x1="12" y1="88" x2="218" y2="88" stroke="rgba(255,122,0,0.15)" strokeWidth="1" />
-                            <text x="115" y="100" textAnchor="middle" fill="rgba(255,150,50,0.6)" fontSize="8" fontFamily="Outfit, sans-serif" letterSpacing="2">TELEVISOR DE PLASMA</text>
-                            {/* Pie izquierdo */}
-                            <rect x="70" y="118" width="20" height="10" rx="2" fill="#1a1a1a" />
-                            {/* Pie derecho */}
-                            <rect x="140" y="118" width="20" height="10" rx="2" fill="#1a1a1a" />
-                            {/* Base izquierda */}
-                            <rect x="55" y="128" width="50" height="6" rx="3" fill="#111111" />
-                            {/* Base derecha */}
-                            <rect x="125" y="128" width="50" height="6" rx="3" fill="#111111" />
-                            {/* Indicador LED naranja */}
-                            <circle cx="205" cy="110" r="3" fill="#ff7a00" opacity="0.9" filter="url(#softGlow)" />
-                        </svg>
+                        {config?.prizeImage ? (
+                            <img src={config.prizeImage} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ) : (
+                            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#111' }}>
+                                <Shuffle size={48} color="rgba(255,122,0,0.2)" />
+                            </div>
+                        )}
+                        <div style={{
+                            position: 'absolute', inset: 0,
+                            background: 'linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 40%)'
+                        }} />
                     </div>
 
-                    {/* Nombre del premio */}
-                    <p style={{
-                        marginTop: '6px',
-                        fontSize: '13px',
+                    <h2 style={{
+                        marginTop: '14px',
+                        fontSize: '18px',
                         fontWeight: 900,
-                        letterSpacing: '1px',
+                        letterSpacing: '-0.5px',
                         background: 'linear-gradient(135deg, #ff7a00, #ffb347)',
                         WebkitBackgroundClip: 'text',
                         WebkitTextFillColor: 'transparent',
                         textTransform: 'uppercase'
                     }}>
-                        {prizeName}
-                    </p>
+                        {config?.prizeName || 'Nombre del Premio'}
+                    </h2>
+
+                    {/* ── CONTADOR DE TIEMPO ── */}
+                    {config?.showCountdown && timeLeft && (
+                        <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                            {[
+                                { v: timeLeft.d, l: 'DÍAS' },
+                                { v: timeLeft.h, l: 'HORAS' },
+                                { v: timeLeft.m, l: 'MIN' },
+                                { v: timeLeft.s, l: 'SEG' }
+                            ].map((t, idx) => (
+                                <div key={idx} style={{ textAlign: 'center' }}>
+                                    <div style={{
+                                        width: '42px', height: '42px',
+                                        background: '#1a1a1a', borderRadius: '10px',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        fontSize: '16px', fontWeight: 900, color: 'white',
+                                        boxShadow: '0 4px 10px rgba(0,0,0,0.2)'
+                                    }}>
+                                        {t.v.toString().padStart(2, '0')}
+                                    </div>
+                                    <div style={{ fontSize: '8px', fontWeight: 800, color: '#999', marginTop: '4px', letterSpacing: '0.5px' }}>{t.l}</div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </motion.div>
 
                 {/* Text Section - con degradado blanco para legibilidad */}

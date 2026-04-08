@@ -24,6 +24,7 @@ model PolleriaConfig {
   id           String   @id @default("default")
   prizeName    String   @default("Televisor Plasma 75 Pulgadas")
   prizeImage   String?  @db.Text
+  showCountdown Boolean @default(true)
   drawDate     DateTime @default(now())
   totalTickets Int      @default(100)
   updatedAt    DateTime @updatedAt
