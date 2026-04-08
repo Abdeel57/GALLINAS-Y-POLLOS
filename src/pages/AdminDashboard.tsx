@@ -3,7 +3,7 @@ import { LayoutDashboard, Ticket, Users, Link2, Plus, Copy, Check, LogOut, Shopp
 import { motion, AnimatePresence } from 'framer-motion';
 import logo from '../assets/logo.png';
 
-const API = import.meta.env.VITE_API_URL || 'https://backend-production-5daa.up.railway.app';
+const API = import.meta.env.VITE_API_URL ?? '';
 const PROMO_SECRET = import.meta.env.VITE_PROMO_SECRET || 'pollos-admin-2024';
 const adminHeaders = { 'Content-Type': 'application/json', 'x-admin-key': PROMO_SECRET };
 const promoHeaders = adminHeaders;

@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { User, Phone, MapPin, Send, ChevronLeft, UserPlus, RefreshCcw } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-const API = import.meta.env.VITE_API_URL || 'https://backend-production-5daa.up.railway.app';
+const API = import.meta.env.VITE_API_URL ?? '';
 
 const RegistrationForm: React.FC = () => {
     const location = useLocation();

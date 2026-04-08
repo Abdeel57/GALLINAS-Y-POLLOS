@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, ChevronLeft, Info, CheckCircle2 } from 'lucide-react';
 
-const API = import.meta.env.VITE_API_URL || 'https://backend-production-5daa.up.railway.app';
+const API = import.meta.env.VITE_API_URL ?? '';
 
 const ChickenLeg = () => (
     <span style={{ fontSize: '18px', lineHeight: 1 }}>🍗</span>

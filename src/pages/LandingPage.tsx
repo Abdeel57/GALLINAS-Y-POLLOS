@@ -4,7 +4,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import logo from '../assets/logo.png';
 import { useState, useEffect } from 'react';
 
-const API = import.meta.env.VITE_API_URL || 'https://backend-production-5daa.up.railway.app';
+const API = import.meta.env.VITE_API_URL ?? '';
 
 const LandingPage: React.FC = () => {
     const navigate = useNavigate();
