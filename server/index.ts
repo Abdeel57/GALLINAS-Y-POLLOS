@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import dotenv from 'dotenv';
-dotenv.config({ path: path.join(__dirname, '../../.env') });
+dotenv.config({ path: path.join(__dirname, '../.env') });
 
 import polleriaRoutes from './routes/polleria.routes';
 import promoCodesRoutes from './routes/promoCodes.routes';
@@ -56,7 +56,7 @@ app.use('/api/polleria', polleriaRoutes);
 app.use('/api/promo-codes', promoCodesRoutes);
 
 // Servir el frontend React (build estático)
-const frontendDist = path.join(__dirname, '..', '..', 'dist');
+const frontendDist = path.join(__dirname, '..', 'dist');
 app.use(express.static(frontendDist));
 app.get('*', (_req, res) => {
     res.sendFile(path.join(frontendDist, 'index.html'));

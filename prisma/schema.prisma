@@ -1,54 +1,43 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
-model Raffle {
-  id          String   @id @default(uuid())
-  name        String
-  description String?
-  logoUrl     String?
-  drawDate    DateTime
-  tickets     Ticket[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-model Ticket {
-  id               String          @id @default(uuid())
-  number           String          @unique
-  status           String          @default("AVAILABLE") // AVAILABLE, CLAIMED, RESERVED
-  participant      Participant?    @relation(fields: [participantId], references: [id])
-  participantId    String?
-  raffle           Raffle          @relation(fields: [raffleId], references: [id])
-  raffleId         String
-  redemptionCode   RedemptionCode? @relation(fields: [redemptionCodeId], references: [id])
-  redemptionCodeId String?
-  claimedAt        DateTime?
-}
-
-model Participant {
-  id        String   @id @default(uuid())
-  name      String
-  phone     String
-  tickets   Ticket[]
-  createdAt DateTime @default(now())
-}
-
-model RedemptionCode {
-  id           String   @id @default(uuid())
+model PromoCode {
+  id           String   @id @default(cuid())
   code         String   @unique
-  maxTickets   Int      @default(1)
-  currentUses  Int      @default(0)
-  isActive     Boolean  @default(true)
-  tickets      Ticket[]
+  ticketsCount Int      @default(1)  // Cantidad de boletos que otorga el link
+  maxUses      Int      @default(1)
+  uses         Int      @default(0)
+  active       Boolean  @default(true)
   createdAt    DateTime @default(now())
-  expiresAt    DateTime?
+  updatedAt    DateTime @updatedAt
+
+  @@index([code])
+}
+
+model PolleriaConfig {
+  id           String   @id @default("default")
+  prizeName    String   @default("Televisor Plasma 75 Pulgadas")
+  prizeImage   String?  @db.Text
+  drawDate     DateTime @default(now())
+  totalTickets Int      @default(100)
+  updatedAt    DateTime @updatedAt
+}
+
+model PolleriaTicket {
+  id           String   @id @default(cuid())
+  number       String
+  ownerName    String
+  ownerPhone   String
+  promoCodeId  String?
+  createdAt    DateTime @default(now())
+
+  @@unique([number])
+  @@index([number])
+  @@index([promoCodeId])
 }
