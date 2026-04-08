@@ -7,7 +7,6 @@ const TicketPicker: React.FC = () => {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const type = searchParams.get('type') || 'choose';
-    const code = searchParams.get('code') || '';
 
     const maxTickets = 2; // Default para demo
     const [selectedTickets, setSelectedTickets] = useState<string[]>([]);

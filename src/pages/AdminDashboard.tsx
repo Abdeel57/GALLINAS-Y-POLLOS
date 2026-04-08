@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
-import { LayoutDashboard, Ticket, Users, Link2, Plus, Copy, Trash2, Check, RefreshCw, LogOut, ExternalLink, ShoppingBag, Edit2, X, Save, Menu, MapPin } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { LayoutDashboard, Ticket, Users, Link2, Plus, Copy, Check, LogOut, ShoppingBag, Edit2, X, Save, Menu } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const AdminDashboard: React.FC = () => {
-    const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('dashboard');
     const [copiedLink, setCopiedLink] = useState<string | null>(null);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
