@@ -9,7 +9,6 @@ const adminHeaders = { 'Content-Type': 'application/json', 'x-admin-key': PROMO_
 const promoHeaders = adminHeaders;
 
 interface PromoCode { id: string; code: string; maxUses: number; uses: number; active: boolean; }
-interface RaffleConfig { prizeName: string; prizeImage?: string; drawDate: string; totalTickets: number; }
 
 interface AdminDashboardProps { onLogout?: () => void; }
 
