@@ -164,6 +164,30 @@ export async function clearOrphanTickets(_req: Request, res: Response) {
     }
 }
 
+export async function resetAllOrders(_req: Request, res: Response) {
+    try {
+        await prisma.polleriaTicket.deleteMany({});
+        res.json({ success: true, message: 'Todos los boletos han sido liberados.' });
+    } catch (err: any) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+}
+
+export async function deleteOrder(req: Request, res: Response) {
+    try {
+        const { name, phone } = req.body;
+        if (!name) return res.status(400).json({ success: false, error: 'Se requiere nombre del cliente' });
+
+        const where: any = { ownerName: name };
+        if (phone) where.ownerPhone = phone;
+
+        const deleted = await prisma.polleriaTicket.deleteMany({ where });
+        res.json({ success: true, deletedCount: deleted.count });
+    } catch (err: any) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+}
+
 export async function testDatabase(_req: Request, res: Response) {
     try {
         const count = await prisma.polleriaTicket.count();

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Ticket, Users, Link2, Plus, Copy, Check, LogOut, ShoppingBag, Edit2, X, Save, Menu, Trash2, Loader, Settings, Trophy, CalendarDays, Hash } from 'lucide-react';
+import { LayoutDashboard, Ticket, Users, Link2, Plus, Copy, Check, LogOut, ShoppingBag, Edit2, X, Save, Menu, Trash2, Loader, Settings, Trophy, CalendarDays, Hash, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import logo from '../assets/logo.png';
 
@@ -325,21 +325,39 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                     <h2 style={{ fontSize: '28px', fontWeight: 900 }}>Órdenes</h2>
                                     <p style={{ color: '#666' }}>Gestionar participantes y boletos reales</p>
                                 </div>
-                                <button
-                                    onClick={async () => {
-                                        if (!confirm('¿Liberar boletos que no tienen nombre de cliente? (Anónimos)')) return;
-                                        try {
-                                            const res = await fetch(`${API}/api/polleria/cleanup`, { method: 'DELETE', headers: adminHeaders });
-                                            const json = await res.json();
-                                            alert(`Se liberaron ${json.deletedCount || 0} boletos.`);
-                                            loadOrders();
-                                        } catch { alert('Error al limpiar'); }
-                                    }}
-                                    className="btn-secondary"
-                                    style={{ padding: '10px 16px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '8px', color: '#e67e22', borderColor: '#ffe0b2' }}
-                                >
-                                    <Trash2 size={16} /> LIBERAR BOLETOS SIN DUEÑO
-                                </button>
+                                <div style={{ display: 'flex', gap: '10px' }}>
+                                    <button
+                                        onClick={async () => {
+                                            if (!confirm('¿CONFIRMAS BORRAR TODAS LAS ÓRDENES? Esto dejará todos los boletos libres de nuevo.')) return;
+                                            try {
+                                                const res = await fetch(`${API}/api/polleria/orders/reset`, { method: 'DELETE', headers: adminHeaders });
+                                                if (res.ok) {
+                                                    alert('Sorteo reseteado correctamente.');
+                                                    loadOrders();
+                                                }
+                                            } catch { alert('Error al resetear'); }
+                                        }}
+                                        className="btn-secondary"
+                                        style={{ padding: '10px 16px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '8px', color: '#c0392b', borderColor: '#fadbd8' }}
+                                    >
+                                        <RefreshCw size={16} /> RESETEAR TODA LA RIFA
+                                    </button>
+                                    <button
+                                        onClick={async () => {
+                                            if (!confirm('¿Liberar boletos que no tienen nombre de cliente? (Anónimos)')) return;
+                                            try {
+                                                const res = await fetch(`${API}/api/polleria/cleanup`, { method: 'DELETE', headers: adminHeaders });
+                                                const json = await res.json();
+                                                alert(`Se liberaron ${json.deletedCount || 0} boletos.`);
+                                                loadOrders();
+                                            } catch { alert('Error al limpiar'); }
+                                        }}
+                                        className="btn-secondary"
+                                        style={{ padding: '10px 16px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '8px', color: '#e67e22', borderColor: '#ffe0b2' }}
+                                    >
+                                        <Trash2 size={16} /> LIMPIAR ANÓNIMOS
+                                    </button>
+                                </div>
                             </header>
 
                             <div className="table-container premium-card" style={{ padding: 0, overflow: 'hidden', background: 'white', border: 'none' }}>
@@ -349,7 +367,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                             <th style={{ padding: '16px 20px', color: '#999', fontWeight: 800, fontSize: '10px', textTransform: 'uppercase' }}>CLIENTE</th>
                                             <th style={{ padding: '16px 20px', color: '#999', fontWeight: 800, fontSize: '10px', textTransform: 'uppercase' }}>UBICACIÓN</th>
                                             <th style={{ padding: '16px 20px', color: '#999', fontWeight: 800, fontSize: '10px', textTransform: 'uppercase' }}>BOLETOS</th>
-                                            <th style={{ padding: '16px 20px', color: '#999', fontWeight: 800, fontSize: '10px', textTransform: 'uppercase', textAlign: 'right' }}>EDITAR</th>
+                                            <th style={{ padding: '16px 20px', color: '#999', fontWeight: 800, fontSize: '10px', textTransform: 'uppercase', textAlign: 'right' }}>ACCIONES</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -373,7 +391,28 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                                         </div>
                                                     </td>
                                                     <td style={{ padding: '16px 20px', textAlign: 'right' }}>
-                                                        <button onClick={() => setEditingOrder(o)} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer' }}><Edit2 size={16} /></button>
+                                                        <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                                                            <button onClick={() => setEditingOrder(o)} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer' }}><Edit2 size={16} /></button>
+                                                            <button
+                                                                onClick={async () => {
+                                                                    if (!confirm(`¿Liberar los boletos de ${o.name}?`)) return;
+                                                                    try {
+                                                                        const res = await fetch(`${API}/api/polleria/orders/delete`, {
+                                                                            method: 'POST',
+                                                                            headers: adminHeaders,
+                                                                            body: JSON.stringify({ name: o.name, phone: o.phone })
+                                                                        });
+                                                                        if (res.ok) {
+                                                                            alert('Boletos liberados.');
+                                                                            loadOrders();
+                                                                        }
+                                                                    } catch { alert('Error al liberar'); }
+                                                                }}
+                                                                style={{ background: 'none', border: 'none', color: '#e74c3c', cursor: 'pointer' }}
+                                                            >
+                                                                <Trash2 size={16} />
+                                                            </button>
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             ))
