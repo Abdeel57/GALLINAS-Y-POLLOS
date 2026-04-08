@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Ticket, Users, Link2, Plus, Copy, Check, LogOut, ShoppingBag, Edit2, X, Save, Menu, Trash2, Loader } from 'lucide-react';
+import { LayoutDashboard, Ticket, Users, Link2, Plus, Copy, Check, LogOut, ShoppingBag, Edit2, X, Save, Menu, Trash2, Loader, Settings, Trophy, CalendarDays, Hash } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import logo from '../assets/logo.png';
 
 const API = import.meta.env.VITE_API_URL || 'https://backend-production-5daa.up.railway.app';
 const PROMO_SECRET = import.meta.env.VITE_PROMO_SECRET || 'pollos-admin-2024';
-const promoHeaders = { 'Content-Type': 'application/json', 'x-admin-key': PROMO_SECRET };
+const adminHeaders = { 'Content-Type': 'application/json', 'x-admin-key': PROMO_SECRET };
+const promoHeaders = adminHeaders;
 
 interface PromoCode { id: string; code: string; maxUses: number; uses: number; active: boolean; }
+interface RaffleConfig { prizeName: string; prizeImage?: string; drawDate: string; totalTickets: number; }
 
 interface AdminDashboardProps { onLogout?: () => void; }
 
@@ -72,9 +74,55 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         } catch { /* noop */ }
     };
 
-    // Mock stats
+    // ── Raffle Config ──────────────────────────────────────
+    const [config, setConfig] = useState({ prizeName: '', prizeImage: '', drawDate: '', totalTickets: 100 });
+    const [configLoading, setConfigLoading] = useState(false);
+    const [configSaving, setConfigSaving] = useState(false);
+    const [configError, setConfigError] = useState('');
+    const [configSuccess, setConfigSuccess] = useState(false);
+    const [minTickets, setMinTickets] = useState(100);
+
+    const loadConfig = async () => {
+        setConfigLoading(true);
+        try {
+            const res = await fetch(`${API}/api/polleria/config`);
+            const json = await res.json();
+            if (json.success) {
+                const d = json.data;
+                setConfig({
+                    prizeName: d.prizeName,
+                    prizeImage: d.prizeImage || '',
+                    drawDate: d.drawDate ? d.drawDate.split('T')[0] : '',
+                    totalTickets: d.totalTickets,
+                });
+                setMinTickets(d.totalTickets);
+            }
+        } catch { /* noop */ } finally { setConfigLoading(false); }
+    };
+
+    useEffect(() => { if (activeTab === 'config') loadConfig(); }, [activeTab]);
+
+    const handleSaveConfig = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setConfigError('');
+        setConfigSaving(true);
+        try {
+            const res = await fetch(`${API}/api/polleria/config`, {
+                method: 'PUT',
+                headers: adminHeaders,
+                body: JSON.stringify(config),
+            });
+            const json = await res.json();
+            if (!json.success) { setConfigError(json.error || 'Error al guardar'); return; }
+            setMinTickets(json.data.totalTickets);
+            setConfigSuccess(true);
+            setTimeout(() => setConfigSuccess(false), 3000);
+        } catch { setConfigError('Error de conexión'); } finally { setConfigSaving(false); }
+    };
+
+    // Stats
     const stats = [
-        { label: 'Boletos Totales', value: '1000', icon: <Ticket /> },
+        { label: 'Boletos Totales', value: config.totalTickets.toString(), icon: <Ticket /> },
         { label: 'Participantes', value: orders.length.toString(), icon: <Users /> },
         { label: 'Links Activos', value: codes.filter(c => c.active).length.toString(), icon: <Link2 /> }
     ];
@@ -135,6 +183,18 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                 }}
             >
                 <Link2 size={20} /> Links de Canje
+            </button>
+            <button
+                onClick={() => { setActiveTab('config'); setIsMobileMenuOpen(false); }}
+                style={{
+                    display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 16px',
+                    background: activeTab === 'config' ? 'var(--primary-glow)' : 'none',
+                    border: 'none', color: activeTab === 'config' ? 'var(--primary)' : '#666',
+                    borderRadius: '12px', cursor: 'pointer', transition: '0.2s', width: '100%',
+                    fontWeight: activeTab === 'config' ? 700 : 500
+                }}
+            >
+                <Settings size={20} /> Configuración
             </button>
         </>
     );
@@ -402,6 +462,113 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                     </table>
                                 )}
                             </div>
+                        </div>
+                    )}
+
+                    {/* ── Tab: Configuración ── */}
+                    {activeTab === 'config' && (
+                        <div style={{ maxWidth: '600px' }}>
+                            <header style={{ marginBottom: '32px' }}>
+                                <h2 style={{ fontSize: '28px', fontWeight: 900 }}>Configuración de la Rifa</h2>
+                                <p style={{ color: '#666', marginTop: '4px' }}>Ajusta el premio, la fecha y la cantidad de boletos</p>
+                            </header>
+
+                            {configLoading ? (
+                                <div style={{ display: 'flex', justifyContent: 'center', padding: '60px' }}>
+                                    <Loader size={32} color="var(--primary)" style={{ animation: 'spin 1s linear infinite' }} />
+                                </div>
+                            ) : (
+                                <form onSubmit={handleSaveConfig} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+
+                                    {/* Premio */}
+                                    <div className="premium-card" style={{ background: 'white', border: 'none', padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                        <h3 style={{ fontSize: '14px', fontWeight: 800, color: '#999', textTransform: 'uppercase', letterSpacing: '1px', margin: 0 }}>Premio</h3>
+
+                                        <div>
+                                            <label style={{ fontSize: '11px', fontWeight: 800, color: '#999', textTransform: 'uppercase', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                <Trophy size={14} /> Nombre del Premio
+                                            </label>
+                                            <input
+                                                required
+                                                type="text"
+                                                className="glass-input"
+                                                placeholder="ej: Televisor Plasma 75 Pulgadas"
+                                                style={{ background: '#f8f9fa', border: '1px solid #eee', color: '#1a1a1a', height: '50px' }}
+                                                value={config.prizeName}
+                                                onChange={e => setConfig(c => ({ ...c, prizeName: e.target.value }))}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label style={{ fontSize: '11px', fontWeight: 800, color: '#999', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>
+                                                URL Imagen del Premio (opcional)
+                                            </label>
+                                            <input
+                                                type="url"
+                                                className="glass-input"
+                                                placeholder="https://..."
+                                                style={{ background: '#f8f9fa', border: '1px solid #eee', color: '#1a1a1a', height: '50px' }}
+                                                value={config.prizeImage}
+                                                onChange={e => setConfig(c => ({ ...c, prizeImage: e.target.value }))}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Fecha y boletos */}
+                                    <div className="premium-card" style={{ background: 'white', border: 'none', padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                        <h3 style={{ fontSize: '14px', fontWeight: 800, color: '#999', textTransform: 'uppercase', letterSpacing: '1px', margin: 0 }}>Sorteo</h3>
+
+                                        <div>
+                                            <label style={{ fontSize: '11px', fontWeight: 800, color: '#999', textTransform: 'uppercase', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                <CalendarDays size={14} /> Fecha del Sorteo
+                                            </label>
+                                            <input
+                                                required
+                                                type="date"
+                                                className="glass-input"
+                                                style={{ background: '#f8f9fa', border: '1px solid #eee', color: '#1a1a1a', height: '50px' }}
+                                                value={config.drawDate}
+                                                onChange={e => setConfig(c => ({ ...c, drawDate: e.target.value }))}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label style={{ fontSize: '11px', fontWeight: 800, color: '#999', textTransform: 'uppercase', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                <Hash size={14} /> Total de Boletos
+                                                <span style={{ fontSize: '10px', color: '#aaa', fontWeight: 500, marginLeft: '4px' }}>(mín. {minTickets})</span>
+                                            </label>
+                                            <input
+                                                required
+                                                type="number"
+                                                min={minTickets}
+                                                className="glass-input"
+                                                style={{ background: '#f8f9fa', border: '1px solid #eee', color: '#1a1a1a', height: '50px' }}
+                                                value={config.totalTickets}
+                                                onChange={e => setConfig(c => ({ ...c, totalTickets: Number(e.target.value) }))}
+                                            />
+                                            <p style={{ fontSize: '11px', color: '#aaa', marginTop: '6px' }}>Solo puedes aumentar la cantidad, no reducirla.</p>
+                                        </div>
+                                    </div>
+
+                                    {configError && (
+                                        <p style={{ color: '#e74c3c', fontSize: '13px', fontWeight: 600, padding: '12px 16px', background: '#fff0f0', borderRadius: '10px' }}>
+                                            {configError}
+                                        </p>
+                                    )}
+
+                                    {configSuccess && (
+                                        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                                            style={{ color: '#27ae60', fontSize: '13px', fontWeight: 600, padding: '12px 16px', background: '#e8f8f0', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <Check size={16} /> Configuración guardada correctamente
+                                        </motion.p>
+                                    )}
+
+                                    <button type="submit" className="btn-primary" style={{ height: '54px', fontSize: '14px' }} disabled={configSaving}>
+                                        {configSaving ? <Loader size={18} style={{ animation: 'spin 1s linear infinite' }} /> : <Save size={18} />}
+                                        {configSaving ? 'GUARDANDO...' : 'GUARDAR CAMBIOS'}
+                                    </button>
+                                </form>
+                            )}
                         </div>
                     )}
                 </div>

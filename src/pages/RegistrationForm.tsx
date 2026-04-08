@@ -27,12 +27,23 @@ const RegistrationForm: React.FC = () => {
         e.preventDefault();
         setSubmitting(true);
         localStorage.setItem('pollos_aliñados_user', JSON.stringify(form));
+
+        // Guardar boletos tomados en el backend
+        try {
+            await fetch(`${API}/api/polleria/tickets`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tickets, ownerName: form.name, ownerPhone: form.phone }),
+            });
+        } catch { /* noop */ }
+
         // Canjear el código si existe
         if (code) {
             try {
                 await fetch(`${API}/api/promo-codes/redeem/${encodeURIComponent(code)}`, { method: 'POST' });
-            } catch { /* noop — no bloqueamos el flujo si falla */ }
+            } catch { /* noop */ }
         }
+
         navigate('/success', { state: { ...form, tickets } });
         setSubmitting(false);
     };

@@ -11,6 +11,15 @@ const LandingPage: React.FC = () => {
     const [searchParams] = useSearchParams();
     const code = searchParams.get('code') || '';
 
+    const [prizeName, setPrizeName] = useState('Televisor Plasma 75 Pulgadas');
+
+    useEffect(() => {
+        fetch(`${API}/api/polleria/config`)
+            .then(r => r.json())
+            .then(json => { if (json.success) setPrizeName(json.data.prizeName); })
+            .catch(() => {});
+    }, []);
+
     const [codeStatus, setCodeStatus] = useState<'idle' | 'loading' | 'valid' | 'invalid'>('idle');
     const [codeError, setCodeError] = useState('');
 
@@ -199,7 +208,7 @@ const LandingPage: React.FC = () => {
                         WebkitTextFillColor: 'transparent',
                         textTransform: 'uppercase'
                     }}>
-                        Televisor Plasma 75 Pulgadas
+                        {prizeName}
                     </p>
                 </motion.div>
 
