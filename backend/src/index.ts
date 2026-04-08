@@ -22,6 +22,8 @@ app.use(cors({
         callback(new Error('Not allowed by CORS'));
     },
     credentials: true,
+    allowedHeaders: ['Content-Type', 'x-admin-key', 'Authorization'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
 }));
 
 app.use(express.json({ limit: '5mb' }));
