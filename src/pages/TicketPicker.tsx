@@ -15,7 +15,7 @@ const TicketPicker: React.FC = () => {
     const type = searchParams.get('type') || 'choose';
     const code = searchParams.get('code') || '';
 
-    const maxTickets = 2;
+    const [maxTickets, setMaxTickets] = useState(2);
     const [selectedTickets, setSelectedTickets] = useState<string[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [totalTickets, setTotalTickets] = useState(100);
@@ -26,15 +26,24 @@ const TicketPicker: React.FC = () => {
         fetch(`${API}/api/polleria/config`)
             .then(r => r.json())
             .then(json => { if (json.success) setTotalTickets(json.data.totalTickets); })
-            .catch(() => {});
+            .catch(() => { });
 
         fetch(`${API}/api/polleria/tickets`)
             .then(r => r.json())
             .then(json => {
                 if (json.success) setTakenNumbers(new Set(json.data.map((t: any) => t.number)));
             })
-            .catch(() => {});
-    }, []);
+            .catch(() => { });
+
+        if (code) {
+            fetch(`${API}/api/promo-codes/validate/${encodeURIComponent(code)}`)
+                .then(r => r.json())
+                .then(json => {
+                    if (json.valid) setMaxTickets(json.ticketsCount || 2);
+                })
+                .catch(() => { });
+        }
+    }, [code]);
 
     const allTickets = Array.from({ length: totalTickets }, (_, i) => i.toString().padStart(2, '0'));
 
@@ -62,8 +71,8 @@ const TicketPicker: React.FC = () => {
             navigate('/registration', { state: { tickets: selected, code } });
         }, 1500);
         return () => clearTimeout(timer);
-    // Solo cuando type es random y la primera vez
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // Solo cuando type es random y la primera vez
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [type]);
 
     const toggleTicket = (number: string) => {

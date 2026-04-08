@@ -33,7 +33,7 @@ const RegistrationForm: React.FC = () => {
             await fetch(`${API}/api/polleria/tickets`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ tickets, ownerName: form.name, ownerPhone: form.phone }),
+                body: JSON.stringify({ tickets, ownerName: form.name, ownerPhone: form.phone, promoCode: code }),
             });
         } catch { /* noop */ }
 

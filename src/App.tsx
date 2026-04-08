@@ -15,6 +15,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/:slug/:code" element={<LandingPage />} />
         <Route path="/picker" element={<TicketPicker />} />
         <Route path="/registration" element={<RegistrationForm />} />
         <Route path="/success" element={<SuccessPage />} />

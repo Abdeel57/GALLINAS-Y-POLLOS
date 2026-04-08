@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Ticket, MapPin, CheckCircle } from 'lucide-react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useLocation } from 'react-router-dom';
 import logo from '../assets/logo.png';
 
 const RAFFLE_NAME = 'RÍOS DE AGUA VIVA';
@@ -10,12 +10,20 @@ const TicketView: React.FC = () => {
     const [searchParams] = useSearchParams();
     const raw = searchParams.get('data');
 
+    const location = useLocation();
+    const stateData = location.state as any;
+
     let name = '';
     let rancheria = '';
     let tickets: string[] = [];
     let date = '';
 
-    if (raw) {
+    if (stateData) {
+        name = stateData.name || '';
+        rancheria = stateData.rancheria || '';
+        tickets = stateData.tickets || [];
+        date = stateData.date || new Date().toLocaleDateString();
+    } else if (raw) {
         try {
             const decoded = JSON.parse(atob(raw));
             name = decoded.name || '';

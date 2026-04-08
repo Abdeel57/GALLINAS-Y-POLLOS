@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Ticket, Shuffle, AlertCircle, Loader } from 'lucide-react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useParams } from 'react-router-dom';
 import logo from '../assets/logo.png';
 import { useState, useEffect } from 'react';
 
@@ -9,7 +9,8 @@ const API = import.meta.env.VITE_API_URL ?? '';
 const LandingPage: React.FC = () => {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
-    const code = searchParams.get('code') || '';
+    const { code: paramCode } = useParams();
+    const code = searchParams.get('code') || paramCode || '';
 
     const [prizeName, setPrizeName] = useState('Televisor Plasma 75 Pulgadas');
 
@@ -17,7 +18,7 @@ const LandingPage: React.FC = () => {
         fetch(`${API}/api/polleria/config`)
             .then(r => r.json())
             .then(json => { if (json.success) setPrizeName(json.data.prizeName); })
-            .catch(() => {});
+            .catch(() => { });
     }, []);
 
     const [codeStatus, setCodeStatus] = useState<'idle' | 'loading' | 'valid' | 'invalid'>('idle');
@@ -31,6 +32,16 @@ const LandingPage: React.FC = () => {
             .then(json => {
                 if (json.valid) {
                     setCodeStatus('valid');
+                } else if (json.canjeado) {
+                    // Si ya se usó, lo llevamos a ver su boleto digital
+                    navigate('/ticket', {
+                        state: {
+                            name: json.tickets[0].ownerName,
+                            phone: json.tickets[0].ownerPhone,
+                            tickets: json.tickets.map((t: any) => t.number),
+                            date: new Date().toLocaleDateString()
+                        }
+                    });
                 } else {
                     setCodeStatus('invalid');
                     const msgs: Record<string, string> = {

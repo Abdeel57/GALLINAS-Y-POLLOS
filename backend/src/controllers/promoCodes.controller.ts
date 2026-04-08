@@ -19,7 +19,13 @@ export async function createPromoCode(req: Request, res: Response) {
         const normalized = String(code).trim().toUpperCase();
         const existing = await prisma.promoCode.findUnique({ where: { code: normalized } });
         if (existing) return res.status(409).json({ success: false, error: 'Ese código ya existe' });
-        const promo = await prisma.promoCode.create({ data: { code: normalized, maxUses: maxUses ? Number(maxUses) : 1 } });
+        const promo = await prisma.promoCode.create({
+            data: {
+                code: normalized,
+                maxUses: maxUses ? Number(maxUses) : 1,
+                ticketsCount: req.body.ticketsCount ? Number(req.body.ticketsCount) : 1
+            }
+        });
         res.status(201).json({ success: true, data: promo });
     } catch (err: any) {
         res.status(500).json({ success: false, error: err.message });
@@ -39,10 +45,33 @@ export async function validatePromoCode(req: Request, res: Response) {
     try {
         const code = req.params.code.trim().toUpperCase();
         const promo = await prisma.promoCode.findUnique({ where: { code } });
-        if (!promo || !promo.active || promo.uses >= promo.maxUses) {
-            return res.json({ valid: false, reason: !promo ? 'not_found' : !promo.active ? 'inactive' : 'exhausted' });
+
+        if (!promo) {
+            return res.json({ valid: false, reason: 'not_found' });
         }
-        res.json({ valid: true, code: promo.code, usesLeft: promo.maxUses - promo.uses });
+
+        if (!promo.active || promo.uses >= promo.maxUses) {
+            // Ya se usó, buscamos qué boletos generó para mostrarlos de nuevo
+            const tickets = await prisma.polleriaTicket.findMany({ where: { promoCodeId: promo.id } });
+            return res.json({
+                valid: false,
+                reason: 'exhausted',
+                canjeado: true,
+                tickets: tickets.map(t => ({
+                    number: t.number,
+                    ownerName: t.ownerName,
+                    ownerPhone: t.ownerPhone
+                }))
+            });
+        }
+
+        res.json({
+            valid: true,
+            code: promo.code,
+            usesLeft: promo.maxUses - promo.uses,
+            maxUses: promo.maxUses,
+            ticketsCount: promo.ticketsCount
+        });
     } catch (err: any) {
         res.status(500).json({ valid: false, reason: 'error' });
     }

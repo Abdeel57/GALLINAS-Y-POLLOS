@@ -8,7 +8,7 @@ const PROMO_SECRET = import.meta.env.VITE_PROMO_SECRET || 'pollos-admin-2024';
 const adminHeaders = { 'Content-Type': 'application/json', 'x-admin-key': PROMO_SECRET };
 const promoHeaders = adminHeaders;
 
-interface PromoCode { id: string; code: string; maxUses: number; uses: number; active: boolean; }
+interface PromoCode { id: string; code: string; maxUses: number; uses: number; active: boolean; ticketsCount: number; }
 
 interface AdminDashboardProps { onLogout?: () => void; }
 
@@ -32,6 +32,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     const [showCreateForm, setShowCreateForm] = useState(false);
     const [newCode, setNewCode] = useState('');
     const [newMaxUses, setNewMaxUses] = useState(1);
+    const [newTicketsCount, setNewTicketsCount] = useState(2);
     const [createError, setCreateError] = useState('');
     const [createLoading, setCreateLoading] = useState(false);
 
@@ -54,7 +55,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
             const res = await fetch(`${API}/admin-api/links`, {
                 method: 'POST',
                 headers: promoHeaders,
-                body: JSON.stringify({ code: newCode, maxUses: newMaxUses }),
+                body: JSON.stringify({ code: newCode, maxUses: newMaxUses, ticketsCount: newTicketsCount }),
             });
             const json = await res.json();
             if (!json.success) { setCreateError(json.error || 'Error al crear'); return; }
@@ -129,8 +130,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         { label: 'Links Activos', value: codes.filter(c => c.active).length.toString(), icon: <Link2 /> }
     ];
 
-    const handleCopyLink = (code: string) => {
-        const link = `${window.location.origin}/?code=${code}`;
+    const handleCopyLink = (code: string, count: number) => {
+        const slug = `${count}-boletos-de-regalo`;
+        const link = `${window.location.origin}/${slug}/${code}`;
         navigator.clipboard.writeText(link);
         setCopiedLink(code);
         setTimeout(() => setCopiedLink(null), 2000);
@@ -384,6 +386,18 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                                 />
                                             </div>
                                             <div style={{ flex: 1, minWidth: '100px' }}>
+                                                <label style={{ fontSize: '10px', fontWeight: 800, color: '#999', textTransform: 'uppercase', marginBottom: '6px', display: 'block' }}>Boletos</label>
+                                                <input
+                                                    required
+                                                    type="number"
+                                                    min={1}
+                                                    className="glass-input"
+                                                    style={{ background: '#f8f9fa', border: '1px solid #eee' }}
+                                                    value={newTicketsCount}
+                                                    onChange={e => setNewTicketsCount(Number(e.target.value))}
+                                                />
+                                            </div>
+                                            <div style={{ flex: 1, minWidth: '100px' }}>
                                                 <label style={{ fontSize: '10px', fontWeight: 800, color: '#999', textTransform: 'uppercase', marginBottom: '6px', display: 'block' }}>Usos máx.</label>
                                                 <input
                                                     required
@@ -418,7 +432,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                     <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                                         <thead>
                                             <tr style={{ background: '#f8f9fa', borderBottom: '1px solid #eee' }}>
-                                                <th style={{ padding: '16px 20px', color: '#999', fontWeight: 800, fontSize: '10px', textTransform: 'uppercase' }}>CÓDIGO</th>
+                                                <th style={{ padding: '16px 20px', color: '#999', fontWeight: 800, fontSize: '10px', textTransform: 'uppercase' }}>CÓDIGO / TIPO</th>
+                                                <th style={{ padding: '16px 20px', color: '#999', fontWeight: 800, fontSize: '10px', textTransform: 'uppercase' }}>BOLETOS</th>
                                                 <th style={{ padding: '16px 20px', color: '#999', fontWeight: 800, fontSize: '10px', textTransform: 'uppercase' }}>USOS</th>
                                                 <th style={{ padding: '16px 20px', color: '#999', fontWeight: 800, fontSize: '10px', textTransform: 'uppercase' }}>ESTADO</th>
                                                 <th style={{ padding: '16px 20px', color: '#999', fontWeight: 800, fontSize: '10px', textTransform: 'uppercase', textAlign: 'right' }}>ACCIONES</th>
@@ -432,6 +447,13 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                                 <tr key={c.id} style={{ borderBottom: '1px solid #f1f3f5' }}>
                                                     <td style={{ padding: '16px 20px' }}>
                                                         <div style={{ fontWeight: 800, letterSpacing: '0.5px' }}>{c.code}</div>
+                                                        <div style={{ fontSize: '10px', color: '#999' }}>Link de Regalo</div>
+                                                    </td>
+                                                    <td style={{ padding: '16px 20px' }}>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                            <Ticket size={14} color="var(--primary)" />
+                                                            <span style={{ fontWeight: 800 }}>{c.ticketsCount}</span>
+                                                        </div>
                                                     </td>
                                                     <td style={{ padding: '16px 20px' }}>
                                                         <span style={{ fontWeight: 700 }}>{c.uses}</span>
@@ -448,7 +470,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                                     </td>
                                                     <td style={{ padding: '16px 20px', textAlign: 'right' }}>
                                                         <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                                                            <button onClick={() => handleCopyLink(c.code)} title="Copiar link"
+                                                            <button onClick={() => handleCopyLink(c.code, c.ticketsCount)} title="Copiar link"
                                                                 style={{ background: 'none', border: 'none', color: copiedLink === c.code ? '#27ae60' : '#666', cursor: 'pointer', padding: '4px' }}>
                                                                 {copiedLink === c.code ? <Check size={18} /> : <Copy size={18} />}
                                                             </button>
@@ -612,7 +634,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                     </div>
                 )}
             </AnimatePresence>
-        </div>
+        </div >
     );
 };
 

@@ -8,13 +8,14 @@ datasource db {
 }
 
 model PromoCode {
-  id        String   @id @default(cuid())
-  code      String   @unique
-  maxUses   Int      @default(1)
-  uses      Int      @default(0)
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String   @id @default(cuid())
+  code         String   @unique
+  ticketsCount Int      @default(1)  // Cantidad de boletos que otorga el link
+  maxUses      Int      @default(1)
+  uses         Int      @default(0)
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   @@index([code])
 }
@@ -29,12 +30,14 @@ model PolleriaConfig {
 }
 
 model PolleriaTicket {
-  id         String   @id @default(cuid())
-  number     String
-  ownerName  String
-  ownerPhone String
-  createdAt  DateTime @default(now())
+  id           String   @id @default(cuid())
+  number       String
+  ownerName    String
+  ownerPhone   String
+  promoCodeId  String?
+  createdAt    DateTime @default(now())
 
   @@unique([number])
   @@index([number])
+  @@index([promoCodeId])
 }

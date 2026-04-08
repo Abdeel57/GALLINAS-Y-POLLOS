@@ -52,15 +52,27 @@ export async function getTakenTickets(_req: Request, res: Response) {
 
 export async function claimTickets(req: Request, res: Response) {
     try {
-        const { tickets, ownerName, ownerPhone } = req.body;
+        const { tickets, ownerName, ownerPhone, promoCode } = req.body;
         if (!Array.isArray(tickets) || tickets.length === 0) {
             return res.status(400).json({ success: false, error: 'Se requieren boletos' });
         }
+
+        let promoId: string | undefined = undefined;
+        if (promoCode) {
+            const promo = await prisma.promoCode.findUnique({ where: { code: String(promoCode).toUpperCase() } });
+            if (promo) promoId = promo.id;
+        }
+
         await prisma.$transaction(
             tickets.map((number: string) =>
                 prisma.polleriaTicket.upsert({
                     where: { number },
-                    create: { number, ownerName: ownerName || 'Anónimo', ownerPhone: ownerPhone || '' },
+                    create: {
+                        number,
+                        ownerName: ownerName || 'Anónimo',
+                        ownerPhone: ownerPhone || '',
+                        promoCodeId: promoId
+                    },
                     update: {},
                 })
             )
