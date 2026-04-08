@@ -45,7 +45,8 @@ const RegistrationForm: React.FC = () => {
             });
             const json = await resp.json();
             if (!json.success) {
-                alert(`Error: ${json.error || 'No se pudo completar el registro'}`);
+                const errorMsg = typeof json.error === 'string' ? json.error : JSON.stringify(json.error);
+                alert(`FALLO DEL SERVIDOR: ${errorMsg}`);
                 setSubmitting(false);
                 return;
             }
