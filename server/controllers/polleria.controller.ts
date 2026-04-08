@@ -54,62 +54,69 @@ export async function getTakenTickets(_req: Request, res: Response) {
 export async function claimTickets(req: Request, res: Response) {
     try {
         const { tickets, ownerName, ownerPhone, ownerRancheria, promoCode } = req.body;
-        console.log(`[API] Registrando boletos: ${tickets?.join(', ')} para ${ownerName}. Código: ${promoCode || 'NINGUNO'}`);
 
         if (!Array.isArray(tickets) || tickets.length === 0) {
             return res.status(400).json({ success: false, error: 'Se requieren boletos' });
         }
 
-        let promoId: string | undefined = undefined;
-        if (promoCode) {
-            const promo = await prisma.promoCode.findUnique({ where: { code: String(promoCode).trim().toUpperCase() } });
-            if (promo) {
-                promoId = promo.id;
-                console.log(`[API] Código validado: ${promo.code} (ID: ${promoId})`);
-            } else {
-                console.log(`[API] Código NO encontrado en la base de datos: ${promoCode}`);
-            }
-        }
+        const result = await prisma.$transaction(async (tx) => {
+            let promoId: string | undefined = undefined;
 
-        await prisma.$transaction(async (tx) => {
-            // 1. Upsert de cada boleto solicitado
+            // 1. Validar código de promoción (si existe)
+            if (promoCode) {
+                const codeStr = String(promoCode).trim().toUpperCase();
+                const promo = await tx.promoCode.findUnique({
+                    where: { code: codeStr }
+                });
+
+                if (!promo) {
+                    throw new Error('El código de promoción no es válido');
+                }
+
+                if (!promo.active || promo.uses >= promo.maxUses) {
+                    throw new Error('Este link de regalo ya ha sido utilizado el máximo de veces permitido');
+                }
+
+                promoId = promo.id;
+
+                // 2. Incrementar uso del código inmediatamente
+                const updatedPromo = await tx.promoCode.update({
+                    where: { id: promoId },
+                    data: {
+                        uses: { increment: 1 },
+                        active: promo.uses + 1 >= promo.maxUses ? false : true
+                    }
+                });
+
+                console.log(`[SECURITY] Código ${codeStr} incrementado: ${updatedPromo.uses}/${updatedPromo.maxUses}`);
+            }
+
+            // 3. Registrar boletos (verificando que no existan)
             for (const number of tickets) {
-                await tx.polleriaTicket.upsert({
-                    where: { number },
-                    create: {
+                // Verificamos si ya existe para dar un error claro
+                const existing = await tx.polleriaTicket.findUnique({ where: { number } });
+                if (existing) {
+                    throw new Error(`El boleto #${number} ya ha sido reservado por otra persona. Por favor elige otros.`);
+                }
+
+                await tx.polleriaTicket.create({
+                    data: {
                         number,
-                        ownerName: ownerName || 'Anónimo',
+                        ownerName: ownerName || 'Cliente',
                         ownerPhone: ownerPhone || '',
                         ownerRancheria: ownerRancheria || '',
                         promoCodeId: promoId
-                    },
-                    update: {
-                        ownerName: ownerName || 'Anónimo',
-                        ownerPhone: ownerPhone || '',
-                        ownerRancheria: ownerRancheria || '',
-                        promoCodeId: promoId
-                    },
+                    }
                 });
             }
 
-            // 2. Si hay un código, lo canjeamos automáticamente aquí para evitar desincronización
-            if (promoId) {
-                const promo = await tx.promoCode.findUnique({ where: { id: promoId } });
-                if (promo && promo.active && promo.uses < promo.maxUses) {
-                    const updated = await tx.promoCode.update({
-                        where: { id: promoId },
-                        data: { uses: { increment: 1 } }
-                    });
-                    // Desactivar si llegó al máximo
-                    if (updated.uses >= updated.maxUses) {
-                        await tx.promoCode.update({ where: { id: promoId }, data: { active: false } });
-                    }
-                }
-            }
+            return { success: true };
         });
-        res.json({ success: true });
+
+        res.json(result);
     } catch (err: any) {
-        res.status(500).json({ success: false, error: err.message });
+        console.error('[SECURITY ERROR] Error en canje:', err.message);
+        res.status(400).json({ success: false, error: err.message || 'Error al procesar la solicitud' });
     }
 }
 

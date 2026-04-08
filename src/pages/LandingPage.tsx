@@ -55,15 +55,27 @@ const LandingPage: React.FC = () => {
     const [codeError, setCodeError] = useState('');
 
     useEffect(() => {
+        // Bloquear carga desde caché (bfcache) para evitar botones fantasma al ir atrás
+        const handlePageShow = (event: PageTransitionEvent) => {
+            if (event.persisted) window.location.reload();
+        };
+        window.addEventListener('pageshow', handlePageShow);
+        return () => window.removeEventListener('pageshow', handlePageShow);
+    }, []);
+
+    useEffect(() => {
         if (!code) return;
         setCodeStatus('loading');
-        fetch(`${API}/api/promo-codes/validate/${encodeURIComponent(code)}`)
+        // Obligamos al navegador a validar siempre contra el servidor (sin caché)
+        fetch(`${API}/api/promo-codes/validate/${encodeURIComponent(code)}`, {
+            cache: 'no-store',
+            headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+        })
             .then(r => r.json())
             .then(json => {
                 if (json.valid) {
                     setCodeStatus('valid');
                 } else if (json.canjeado && json.tickets?.length > 0) {
-                    // Si ya se usó, lo llevamos a ver su boleto digital (SuccessPage)
                     navigate('/success', {
                         state: {
                             name: json.tickets[0]?.ownerName || 'Cliente',
@@ -71,27 +83,26 @@ const LandingPage: React.FC = () => {
                             rancheria: json.tickets[0]?.ownerRancheria || '',
                             tickets: json.tickets.map((t: any) => t.number),
                             date: new Date(json.tickets[0]?.createdAt || Date.now()).toLocaleDateString()
-                        }
+                        },
+                        replace: true // Reemplaza historial para evitar bucles de navegación
                     });
                 } else if (json.canjeado) {
-                    // Se canjeó pero no hay boletos (error de sincro)
                     setCodeStatus('invalid');
-                    setCodeError('El link ya fue usado pero no se encontraron boletos.');
+                    setCodeError('Este link ya fue canjeado anteriormente.');
                 } else {
                     setCodeStatus('invalid');
                     const msgs: Record<string, string> = {
-                        not_found: 'Este link no existe.',
-                        inactive: 'Este link ya fue usado.',
-                        exhausted: 'Este link ya fue usado.',
+                        not_found: 'Este link no es válido.',
+                        inactive: 'Este link ya se encuentra inactivo.',
+                        exhausted: 'Este link ha superado el límite de usos.',
                     };
-                    setCodeError(msgs[json.reason] || 'Link inválido.');
+                    setCodeError(msgs[json.reason] || 'Link no válido.');
                 }
             })
             .catch(() => {
-                // Si hay error de red, dejamos pasar (fail open)
-                setCodeStatus('valid');
+                setCodeStatus('idle'); // Reintentar si falla la red
             });
-    }, [code]);
+    }, [code, navigate]);
 
     return (
         <div style={{
