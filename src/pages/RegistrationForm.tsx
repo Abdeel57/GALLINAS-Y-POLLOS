@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { User, Phone, MapPin, Send, ChevronLeft, UserPlus, RefreshCcw } from 'lucide-react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 
 const RegistrationForm: React.FC = () => {
     const location = useLocation();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+
     const tickets = location.state?.tickets || [];
-    const code: string = location.state?.code || '';
+    const code: string = searchParams.get('code') || location.state?.code || '';
 
     const [form, setForm] = useState({ name: '', phone: '', rancheria: '' });
     const [isSavedUser, setIsSavedUser] = useState(false);

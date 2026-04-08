@@ -53,14 +53,21 @@ export async function getTakenTickets(_req: Request, res: Response) {
 export async function claimTickets(req: Request, res: Response) {
     try {
         const { tickets, ownerName, ownerPhone, ownerRancheria, promoCode } = req.body;
+        console.log(`[API] Registrando boletos: ${tickets?.join(', ')} para ${ownerName}. Código: ${promoCode || 'NINGUNO'}`);
+
         if (!Array.isArray(tickets) || tickets.length === 0) {
             return res.status(400).json({ success: false, error: 'Se requieren boletos' });
         }
 
         let promoId: string | undefined = undefined;
         if (promoCode) {
-            const promo = await prisma.promoCode.findUnique({ where: { code: String(promoCode).toUpperCase() } });
-            if (promo) promoId = promo.id;
+            const promo = await prisma.promoCode.findUnique({ where: { code: String(promoCode).trim().toUpperCase() } });
+            if (promo) {
+                promoId = promo.id;
+                console.log(`[API] Código validado: ${promo.code} (ID: ${promoId})`);
+            } else {
+                console.log(`[API] Código NO encontrado en la base de datos: ${promoCode}`);
+            }
         }
 
         await prisma.$transaction(async (tx) => {

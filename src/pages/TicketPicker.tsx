@@ -205,7 +205,7 @@ const TicketPicker: React.FC = () => {
                             </div>
                         </div>
                         <button
-                            onClick={() => navigate('/registration', { state: { tickets: selectedTickets, code } })}
+                            onClick={() => navigate(`/registration?code=${code}`, { state: { tickets: selectedTickets, code } })}
                             disabled={selectedTickets.length < maxTickets}
                             className="btn-primary"
                             style={{ width: '100%', height: '56px', fontSize: '16px', opacity: selectedTickets.length === maxTickets ? 1 : 0.5 }}
