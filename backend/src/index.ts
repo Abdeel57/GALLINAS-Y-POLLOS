@@ -1,6 +1,9 @@
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
+import dotenv from 'dotenv';
+dotenv.config({ path: path.join(__dirname, '../../.env') });
+
 import polleriaRoutes from './routes/polleria.routes';
 import promoCodesRoutes from './routes/promoCodes.routes';
 import { listPromoCodes, createPromoCode, deletePromoCode } from './controllers/promoCodes.controller';
