@@ -3,6 +3,7 @@ import cors from 'cors';
 import path from 'path';
 import polleriaRoutes from './routes/polleria.routes';
 import promoCodesRoutes from './routes/promoCodes.routes';
+import { listPromoCodes, createPromoCode, deletePromoCode } from './controllers/promoCodes.controller';
 
 const app = express();
 
@@ -36,10 +37,20 @@ app.use((req, res, next) => {
     next();
 });
 
+// Admin Direct Routes (Para evitar 405)
+const SECRET = process.env.ADMIN_SECRET || 'pollos-admin-2024';
+const checkAdmin = (req: any, res: any, next: any) => {
+    if (req.headers['x-admin-key'] !== SECRET) return res.status(401).json({ success: false, error: 'No autorizado' });
+    next();
+};
+
+app.get('/admin-api/links', checkAdmin, listPromoCodes);
+app.post('/admin-api/links', checkAdmin, createPromoCode);
+app.delete('/admin-api/links/:id', checkAdmin, deletePromoCode);
+
 // API routes
 app.use('/api/polleria', polleriaRoutes);
-app.use('/api/admin-canje', promoCodesRoutes);
-app.use('/api/promo-codes', promoCodesRoutes); // Mantener por compatibilidad con público
+app.use('/api/promo-codes', promoCodesRoutes);
 
 // Servir el frontend React (build estático)
 const frontendDist = path.join(__dirname, '..', '..', 'dist');

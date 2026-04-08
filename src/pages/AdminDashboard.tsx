@@ -38,7 +38,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     const loadCodes = async () => {
         setCodesLoading(true);
         try {
-            const res = await fetch(`${API}/api/admin-canje/`, { headers: promoHeaders });
+            const res = await fetch(`${API}/admin-api/links`, { headers: promoHeaders });
             const json = await res.json();
             if (json.success) setCodes(json.data);
         } catch { /* noop */ } finally { setCodesLoading(false); }
@@ -51,7 +51,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         setCreateError('');
         setCreateLoading(true);
         try {
-            const res = await fetch(`${API}/api/admin-canje/`, {
+            const res = await fetch(`${API}/admin-api/links`, {
                 method: 'POST',
                 headers: promoHeaders,
                 body: JSON.stringify({ code: newCode, maxUses: newMaxUses }),
@@ -71,7 +71,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     const handleDeleteCode = async (id: string) => {
         if (!confirm('¿Eliminar este código?')) return;
         try {
-            await fetch(`${API}/api/admin-canje/${id}`, { method: 'DELETE', headers: promoHeaders });
+            await fetch(`${API}/admin-api/links/${id}`, { method: 'DELETE', headers: promoHeaders });
             setCodes(prev => prev.filter(c => c.id !== id));
         } catch { /* noop */ }
     };
