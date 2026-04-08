@@ -1,7 +1,13 @@
-import React, { useState } from 'react';
-import { LayoutDashboard, Ticket, Users, Link2, Plus, Copy, Check, LogOut, ShoppingBag, Edit2, X, Save, Menu } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { LayoutDashboard, Ticket, Users, Link2, Plus, Copy, Check, LogOut, ShoppingBag, Edit2, X, Save, Menu, Trash2, Loader } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import logo from '../assets/logo.png';
+
+const API = import.meta.env.VITE_API_URL || 'https://backend-production-5daa.up.railway.app';
+const PROMO_SECRET = import.meta.env.VITE_PROMO_SECRET || 'pollos-admin-2024';
+const promoHeaders = { 'Content-Type': 'application/json', 'x-admin-key': PROMO_SECRET };
+
+interface PromoCode { id: string; code: string; maxUses: number; uses: number; active: boolean; }
 
 interface AdminDashboardProps { onLogout?: () => void; }
 
@@ -19,18 +25,59 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
 
     const [editingOrder, setEditingOrder] = useState<any>(null);
 
+    // Promo codes — API real
+    const [codes, setCodes] = useState<PromoCode[]>([]);
+    const [codesLoading, setCodesLoading] = useState(false);
+    const [showCreateForm, setShowCreateForm] = useState(false);
+    const [newCode, setNewCode] = useState('');
+    const [newMaxUses, setNewMaxUses] = useState(1);
+    const [createError, setCreateError] = useState('');
+    const [createLoading, setCreateLoading] = useState(false);
+
+    const loadCodes = async () => {
+        setCodesLoading(true);
+        try {
+            const res = await fetch(`${API}/api/admin/promo-codes`, { headers: promoHeaders });
+            const json = await res.json();
+            if (json.success) setCodes(json.data);
+        } catch { /* noop */ } finally { setCodesLoading(false); }
+    };
+
+    useEffect(() => { if (activeTab === 'codes') loadCodes(); }, [activeTab]);
+
+    const handleCreateCode = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setCreateError('');
+        setCreateLoading(true);
+        try {
+            const res = await fetch(`${API}/api/admin/promo-codes`, {
+                method: 'POST',
+                headers: promoHeaders,
+                body: JSON.stringify({ code: newCode, maxUses: newMaxUses }),
+            });
+            const json = await res.json();
+            if (!json.success) { setCreateError(json.error || 'Error al crear'); return; }
+            setCodes(prev => [json.data, ...prev]);
+            setNewCode('');
+            setNewMaxUses(1);
+            setShowCreateForm(false);
+        } catch { setCreateError('Error de conexión'); } finally { setCreateLoading(false); }
+    };
+
+    const handleDeleteCode = async (id: string) => {
+        if (!confirm('¿Eliminar este código?')) return;
+        try {
+            await fetch(`${API}/api/admin/promo-codes/${id}`, { method: 'DELETE', headers: promoHeaders });
+            setCodes(prev => prev.filter(c => c.id !== id));
+        } catch { /* noop */ }
+    };
+
     // Mock stats
     const stats = [
         { label: 'Boletos Totales', value: '1000', icon: <Ticket /> },
         { label: 'Participantes', value: orders.length.toString(), icon: <Users /> },
-        { label: 'Canjes Activos', value: '45', icon: <Link2 /> }
+        { label: 'Links Activos', value: codes.filter(c => c.active).length.toString(), icon: <Link2 /> }
     ];
-
-    const [codes] = useState([
-        { id: '1', code: 'PROMO-2024-X1', maxTickets: 2, uses: 1, active: true },
-        { id: '2', code: 'GRATIS-POLLO', maxTickets: 1, uses: 0, active: true },
-        { id: '3', code: 'RESERVA-VIP', maxTickets: 5, uses: 5, active: false },
-    ]);
 
     const handleCopyLink = (code: string) => {
         const link = `${window.location.origin}/?code=${code}`;
@@ -246,35 +293,114 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                     {activeTab === 'codes' && (
                         <div>
                             <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
-                                <h2 style={{ fontSize: '28px', fontWeight: 900 }}>Links</h2>
-                                <button className="btn-primary" style={{ padding: '8px 16px', fontSize: '12px' }}><Plus size={16} /> NUEVO</button>
+                                <div>
+                                    <h2 style={{ fontSize: '28px', fontWeight: 900 }}>Links de Canje</h2>
+                                    <p style={{ color: '#666', marginTop: '4px' }}>Links de uso único para boletos gratis</p>
+                                </div>
+                                <button className="btn-primary" style={{ padding: '10px 18px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }} onClick={() => { setShowCreateForm(true); setCreateError(''); }}>
+                                    <Plus size={16} /> NUEVO
+                                </button>
                             </header>
 
+                            {/* Formulario de creación */}
+                            <AnimatePresence>
+                                {showCreateForm && (
+                                    <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
+                                        className="premium-card" style={{ background: 'white', border: '2px solid var(--primary-glow)', marginBottom: '24px', padding: '24px' }}>
+                                        <h3 style={{ fontWeight: 800, marginBottom: '16px', fontSize: '15px' }}>Crear nuevo link</h3>
+                                        <form onSubmit={handleCreateCode} style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+                                            <div style={{ flex: 2, minWidth: '160px' }}>
+                                                <label style={{ fontSize: '10px', fontWeight: 800, color: '#999', textTransform: 'uppercase', marginBottom: '6px', display: 'block' }}>Código</label>
+                                                <input
+                                                    required
+                                                    type="text"
+                                                    className="glass-input"
+                                                    placeholder="ej: POLLO-GRATIS-01"
+                                                    style={{ background: '#f8f9fa', border: '1px solid #eee', textTransform: 'uppercase' }}
+                                                    value={newCode}
+                                                    onChange={e => setNewCode(e.target.value.toUpperCase())}
+                                                />
+                                            </div>
+                                            <div style={{ flex: 1, minWidth: '100px' }}>
+                                                <label style={{ fontSize: '10px', fontWeight: 800, color: '#999', textTransform: 'uppercase', marginBottom: '6px', display: 'block' }}>Usos máx.</label>
+                                                <input
+                                                    required
+                                                    type="number"
+                                                    min={1}
+                                                    className="glass-input"
+                                                    style={{ background: '#f8f9fa', border: '1px solid #eee' }}
+                                                    value={newMaxUses}
+                                                    onChange={e => setNewMaxUses(Number(e.target.value))}
+                                                />
+                                            </div>
+                                            <div style={{ display: 'flex', gap: '8px' }}>
+                                                <button type="submit" className="btn-primary" style={{ padding: '12px 20px', whiteSpace: 'nowrap' }} disabled={createLoading}>
+                                                    {createLoading ? <Loader size={16} style={{ animation: 'spin 1s linear infinite' }} /> : 'CREAR'}
+                                                </button>
+                                                <button type="button" onClick={() => setShowCreateForm(false)} style={{ padding: '12px 16px', background: '#f1f3f5', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 700 }}>
+                                                    <X size={16} />
+                                                </button>
+                                            </div>
+                                        </form>
+                                        {createError && <p style={{ color: '#e74c3c', fontSize: '12px', marginTop: '8px' }}>{createError}</p>}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+
                             <div className="table-container premium-card" style={{ padding: 0, overflow: 'hidden', background: 'white', border: 'none' }}>
-                                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                                    <thead>
-                                        <tr style={{ background: '#f8f9fa', borderBottom: '1px solid #eee' }}>
-                                            <th style={{ padding: '16px 20px', color: '#999', fontWeight: 800, fontSize: '10px', textTransform: 'uppercase' }}>CÓDIGO</th>
-                                            <th style={{ padding: '16px 20px', color: '#999', fontWeight: 800, fontSize: '10px', textTransform: 'uppercase' }}>USOS</th>
-                                            <th style={{ padding: '16px 20px', color: '#999', fontWeight: 800, fontSize: '10px', textTransform: 'uppercase', textAlign: 'right' }}>COPIAR</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {codes.map(c => (
-                                            <tr key={c.id} style={{ borderBottom: '1px solid #f1f3f5' }}>
-                                                <td style={{ padding: '16px 20px' }}>
-                                                    <div style={{ fontWeight: 700 }}>{c.code}</div>
-                                                </td>
-                                                <td style={{ padding: '16px 20px' }}>{c.uses}/{c.maxTickets}</td>
-                                                <td style={{ padding: '16px 20px', textAlign: 'right' }}>
-                                                    <button onClick={() => handleCopyLink(c.code)} style={{ background: 'none', border: 'none', color: copiedLink === c.code ? 'var(--success)' : '#666', cursor: 'pointer' }}>
-                                                        {copiedLink === c.code ? <Check size={18} /> : <Copy size={18} />}
-                                                    </button>
-                                                </td>
+                                {codesLoading ? (
+                                    <div style={{ padding: '40px', textAlign: 'center', color: '#999' }}>
+                                        <Loader size={24} style={{ animation: 'spin 1s linear infinite' }} />
+                                    </div>
+                                ) : (
+                                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                                        <thead>
+                                            <tr style={{ background: '#f8f9fa', borderBottom: '1px solid #eee' }}>
+                                                <th style={{ padding: '16px 20px', color: '#999', fontWeight: 800, fontSize: '10px', textTransform: 'uppercase' }}>CÓDIGO</th>
+                                                <th style={{ padding: '16px 20px', color: '#999', fontWeight: 800, fontSize: '10px', textTransform: 'uppercase' }}>USOS</th>
+                                                <th style={{ padding: '16px 20px', color: '#999', fontWeight: 800, fontSize: '10px', textTransform: 'uppercase' }}>ESTADO</th>
+                                                <th style={{ padding: '16px 20px', color: '#999', fontWeight: 800, fontSize: '10px', textTransform: 'uppercase', textAlign: 'right' }}>ACCIONES</th>
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody>
+                                            {codes.length === 0 && (
+                                                <tr><td colSpan={4} style={{ padding: '40px', textAlign: 'center', color: '#aaa', fontSize: '14px' }}>No hay links creados aún</td></tr>
+                                            )}
+                                            {codes.map(c => (
+                                                <tr key={c.id} style={{ borderBottom: '1px solid #f1f3f5' }}>
+                                                    <td style={{ padding: '16px 20px' }}>
+                                                        <div style={{ fontWeight: 800, letterSpacing: '0.5px' }}>{c.code}</div>
+                                                    </td>
+                                                    <td style={{ padding: '16px 20px' }}>
+                                                        <span style={{ fontWeight: 700 }}>{c.uses}</span>
+                                                        <span style={{ color: '#999' }}>/{c.maxUses}</span>
+                                                    </td>
+                                                    <td style={{ padding: '16px 20px' }}>
+                                                        <span style={{
+                                                            padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 700,
+                                                            background: c.active ? '#e8f8f0' : '#f8f9fa',
+                                                            color: c.active ? '#27ae60' : '#999'
+                                                        }}>
+                                                            {c.active ? 'Activo' : 'Agotado'}
+                                                        </span>
+                                                    </td>
+                                                    <td style={{ padding: '16px 20px', textAlign: 'right' }}>
+                                                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                                                            <button onClick={() => handleCopyLink(c.code)} title="Copiar link"
+                                                                style={{ background: 'none', border: 'none', color: copiedLink === c.code ? '#27ae60' : '#666', cursor: 'pointer', padding: '4px' }}>
+                                                                {copiedLink === c.code ? <Check size={18} /> : <Copy size={18} />}
+                                                            </button>
+                                                            <button onClick={() => handleDeleteCode(c.id)} title="Eliminar"
+                                                                style={{ background: 'none', border: 'none', color: '#e74c3c', cursor: 'pointer', padding: '4px' }}>
+                                                                <Trash2 size={18} />
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                )}
                             </div>
                         </div>
                     )}

@@ -3,18 +3,17 @@ import { motion } from 'framer-motion';
 import { User, Phone, MapPin, Send, ChevronLeft, UserPlus, RefreshCcw } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
+const API = import.meta.env.VITE_API_URL || 'https://backend-production-5daa.up.railway.app';
+
 const RegistrationForm: React.FC = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const tickets = location.state?.tickets || [];
+    const code: string = location.state?.code || '';
 
-    const [form, setForm] = useState({
-        name: '',
-        phone: '',
-        rancheria: ''
-    });
-
+    const [form, setForm] = useState({ name: '', phone: '', rancheria: '' });
     const [isSavedUser, setIsSavedUser] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
         const savedData = localStorage.getItem('pollos_aliñados_user');
@@ -24,11 +23,18 @@ const RegistrationForm: React.FC = () => {
         }
     }, []);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Guardar en localStorage para la próxima vez
+        setSubmitting(true);
         localStorage.setItem('pollos_aliñados_user', JSON.stringify(form));
+        // Canjear el código si existe
+        if (code) {
+            try {
+                await fetch(`${API}/api/promo-codes/redeem/${encodeURIComponent(code)}`, { method: 'POST' });
+            } catch { /* noop — no bloqueamos el flujo si falla */ }
+        }
         navigate('/success', { state: { ...form, tickets } });
+        setSubmitting(false);
     };
 
     const clearForm = () => {
@@ -130,9 +136,9 @@ const RegistrationForm: React.FC = () => {
                     </div>
 
                     <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                        <button type="submit" className="btn-primary" style={{ width: '100%', height: '56px' }}>
+                        <button type="submit" className="btn-primary" style={{ width: '100%', height: '56px' }} disabled={submitting}>
                             <Send size={18} />
-                            ¡PARTICIPAR AHORA!
+                            {submitting ? 'REGISTRANDO...' : '¡PARTICIPAR AHORA!'}
                         </button>
 
                         {isSavedUser && (

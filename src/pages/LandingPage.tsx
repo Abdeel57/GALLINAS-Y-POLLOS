@@ -1,12 +1,42 @@
 import { motion } from 'framer-motion';
-import { Ticket, Shuffle } from 'lucide-react';
+import { Ticket, Shuffle, AlertCircle, Loader } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import logo from '../assets/logo.png';
+import { useState, useEffect } from 'react';
+
+const API = import.meta.env.VITE_API_URL || 'https://backend-production-5daa.up.railway.app';
 
 const LandingPage: React.FC = () => {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const code = searchParams.get('code') || '';
+
+    const [codeStatus, setCodeStatus] = useState<'idle' | 'loading' | 'valid' | 'invalid'>('idle');
+    const [codeError, setCodeError] = useState('');
+
+    useEffect(() => {
+        if (!code) return;
+        setCodeStatus('loading');
+        fetch(`${API}/api/promo-codes/validate/${encodeURIComponent(code)}`)
+            .then(r => r.json())
+            .then(json => {
+                if (json.valid) {
+                    setCodeStatus('valid');
+                } else {
+                    setCodeStatus('invalid');
+                    const msgs: Record<string, string> = {
+                        not_found: 'Este link no existe.',
+                        inactive: 'Este link ya fue usado.',
+                        exhausted: 'Este link ya fue usado.',
+                    };
+                    setCodeError(msgs[json.reason] || 'Link inválido.');
+                }
+            })
+            .catch(() => {
+                // Si hay error de red, dejamos pasar (fail open)
+                setCodeStatus('valid');
+            });
+    }, [code]);
 
     return (
         <div style={{
@@ -207,42 +237,46 @@ const LandingPage: React.FC = () => {
                     </p>
                 </motion.div>
 
-                {/* Buttons Section - Tighter layout */}
-                <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '12px',
-                    width: '100%',
-                    maxWidth: '280px'
-                }}>
-                    <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => navigate(`/picker?type=random&code=${code}`)}
-                        className="btn-primary"
-                        style={{ width: '100%', padding: '14px' }}
-                    >
-                        <Shuffle size={18} />
-                        AL AZAR
-                    </motion.button>
+                {/* Buttons Section */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', maxWidth: '280px' }}>
+                    {codeStatus === 'loading' && (
+                        <div style={{ display: 'flex', justifyContent: 'center', padding: '16px' }}>
+                            <Loader size={28} color="var(--primary)" style={{ animation: 'spin 1s linear infinite' }} />
+                        </div>
+                    )}
 
-                    <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => navigate(`/picker?type=choose&code=${code}`)}
-                        className="btn-secondary"
-                        style={{
-                            width: '100%',
-                            padding: '14px',
-                            display: 'flex',
-                            gap: '10px',
-                            justifyContent: 'center',
-                            alignItems: 'center'
-                        }}
-                    >
-                        <Ticket size={18} />
-                        ELEGIR BOLETOS
-                    </motion.button>
+                    {codeStatus === 'invalid' && (
+                        <div style={{
+                            display: 'flex', alignItems: 'center', gap: '10px',
+                            background: '#fff0f0', border: '1px solid #fcc', borderRadius: '12px',
+                            padding: '14px 16px', color: '#c0392b'
+                        }}>
+                            <AlertCircle size={20} style={{ flexShrink: 0 }} />
+                            <span style={{ fontSize: '13px', fontWeight: 600 }}>{codeError}</span>
+                        </div>
+                    )}
+
+                    {(codeStatus === 'valid' || codeStatus === 'idle') && (
+                        <>
+                            <motion.button
+                                whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                                onClick={() => navigate(`/picker?type=random&code=${code}`)}
+                                className="btn-primary"
+                                style={{ width: '100%', padding: '14px' }}
+                            >
+                                <Shuffle size={18} /> AL AZAR
+                            </motion.button>
+
+                            <motion.button
+                                whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                                onClick={() => navigate(`/picker?type=choose&code=${code}`)}
+                                className="btn-secondary"
+                                style={{ width: '100%', padding: '14px', display: 'flex', gap: '10px', justifyContent: 'center', alignItems: 'center' }}
+                            >
+                                <Ticket size={18} /> ELEGIR BOLETOS
+                            </motion.button>
+                        </>
+                    )}
                 </div>
             </motion.div>
 

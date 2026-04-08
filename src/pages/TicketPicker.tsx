@@ -7,6 +7,7 @@ const TicketPicker: React.FC = () => {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const type = searchParams.get('type') || 'choose';
+    const code = searchParams.get('code') || '';
 
     const maxTickets = 2; // Default para demo
     const [selectedTickets, setSelectedTickets] = useState<string[]>([]);
@@ -20,7 +21,7 @@ const TicketPicker: React.FC = () => {
             const selected = shuffled.slice(0, maxTickets);
             setSelectedTickets(selected);
             const timer = setTimeout(() => {
-                navigate('/registration', { state: { tickets: selected } });
+                navigate('/registration', { state: { tickets: selected, code } });
             }, 1500);
             return () => clearTimeout(timer);
         }
