@@ -1,0 +1,54 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Raffle {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  logoUrl     String?
+  drawDate    DateTime
+  tickets     Ticket[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Ticket {
+  id               String          @id @default(uuid())
+  number           String          @unique
+  status           String          @default("AVAILABLE") // AVAILABLE, CLAIMED, RESERVED
+  participant      Participant?    @relation(fields: [participantId], references: [id])
+  participantId    String?
+  raffle           Raffle          @relation(fields: [raffleId], references: [id])
+  raffleId         String
+  redemptionCode   RedemptionCode? @relation(fields: [redemptionCodeId], references: [id])
+  redemptionCodeId String?
+  claimedAt        DateTime?
+}
+
+model Participant {
+  id        String   @id @default(uuid())
+  name      String
+  phone     String
+  tickets   Ticket[]
+  createdAt DateTime @default(now())
+}
+
+model RedemptionCode {
+  id           String   @id @default(uuid())
+  code         String   @unique
+  maxTickets   Int      @default(1)
+  currentUses  Int      @default(0)
+  isActive     Boolean  @default(true)
+  tickets      Ticket[]
+  createdAt    DateTime @default(now())
+  expiresAt    DateTime?
+}
