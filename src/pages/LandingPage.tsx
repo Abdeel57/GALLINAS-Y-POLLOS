@@ -2,7 +2,6 @@ import { motion } from 'framer-motion';
 import { Ticket, Shuffle } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import logo from '../assets/logo.png';
-import ChickenAnimation from '../components/ChickenAnimation';
 
 const LandingPage: React.FC = () => {
     const navigate = useNavigate();
@@ -260,7 +259,6 @@ const LandingPage: React.FC = () => {
             </div>
 
             {/* Animación del pollo saliendo del TV */}
-            <ChickenAnimation />
         </div>
     );
 };
