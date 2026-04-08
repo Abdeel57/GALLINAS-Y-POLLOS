@@ -3,7 +3,9 @@ import { motion } from 'framer-motion';
 import { Lock, User, LogIn, ChevronLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-const AdminLogin: React.FC = () => {
+interface AdminLoginProps { onLogin?: () => void; }
+
+const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
     const navigate = useNavigate();
     const [user, setUser] = useState('');
     const [password, setPassword] = useState('');
@@ -11,9 +13,9 @@ const AdminLogin: React.FC = () => {
 
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
-        // Credenciales estáticas para el demo
         if (user === 'admin' && password === 'admin123') {
             localStorage.setItem('is_admin_logged', 'true');
+            onLogin?.();
             navigate('/admin');
         } else {
             setError('Usuario o contraseña incorrectos');

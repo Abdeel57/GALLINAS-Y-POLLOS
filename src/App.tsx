@@ -1,4 +1,5 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
 import TicketPicker from './pages/TicketPicker';
 import RegistrationForm from './pages/RegistrationForm';
@@ -8,7 +9,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import AdminLogin from './pages/AdminLogin';
 
 function App() {
-  const isAdmin = localStorage.getItem('is_admin_logged') === 'true';
+  const [isAdmin, setIsAdmin] = useState(() => localStorage.getItem('is_admin_logged') === 'true');
 
   return (
     <Router>
@@ -18,8 +19,8 @@ function App() {
         <Route path="/registration" element={<RegistrationForm />} />
         <Route path="/success" element={<SuccessPage />} />
         <Route path="/ticket" element={<TicketView />} />
-        <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/admin" element={isAdmin ? <AdminDashboard /> : <AdminLogin />} />
+        <Route path="/admin/login" element={<AdminLogin onLogin={() => setIsAdmin(true)} />} />
+        <Route path="/admin" element={isAdmin ? <AdminDashboard onLogout={() => setIsAdmin(false)} /> : <Navigate to="/admin/login" replace />} />
       </Routes>
     </Router>
   );
