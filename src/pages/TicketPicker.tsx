@@ -19,7 +19,16 @@ const TicketPicker: React.FC = () => {
     const [selectedTickets, setSelectedTickets] = useState<string[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [totalTickets, setTotalTickets] = useState(100);
-    const [takenNumbers, setTakenNumbers] = useState<Set<string>>(new Set());
+    // Cambiamos Set por Map para guardar { numero: nombre }
+    const [takenData, setTakenData] = useState<Map<string, string>>(new Map());
+
+    // Auxiliar para formatear nombre (1 Nombre + 1 Apellido)
+    const formatName = (fullName: string) => {
+        if (!fullName || fullName === 'Anónimo' || fullName === 'Cliente') return 'Ocupado';
+        const parts = fullName.trim().split(/\s+/);
+        if (parts.length === 1) return parts[0];
+        return `${parts[0]} ${parts[1]}`;
+    };
 
     // Fetch config + taken tickets
     useEffect(() => {
@@ -31,7 +40,11 @@ const TicketPicker: React.FC = () => {
         fetch(`${API}/api/polleria/tickets`)
             .then(r => r.json())
             .then(json => {
-                if (json.success) setTakenNumbers(new Set(json.data.map((t: any) => t.number)));
+                if (json.success) {
+                    const map = new Map();
+                    json.data.forEach((t: any) => map.set(t.number, t.ownerName));
+                    setTakenData(map);
+                }
             })
             .catch(() => { });
 
@@ -56,14 +69,14 @@ const TicketPicker: React.FC = () => {
                 })
                 .catch(() => { });
         }
-    }, [code]);
+    }, [code, navigate]);
 
     const allTickets = Array.from({ length: totalTickets }, (_, i) => i.toString().padStart(2, '0'));
 
     // Random: excluir tomados, asignar disponibles al azar
     useEffect(() => {
-        if (type !== 'random' || totalTickets === 100) return; // espera a que cargue config
-        const available = allTickets.filter(n => !takenNumbers.has(n));
+        if (type !== 'random' || totalTickets === 100) return;
+        const available = allTickets.filter(n => !takenData.has(n));
         const shuffled = [...available].sort(() => 0.5 - Math.random());
         const selected = shuffled.slice(0, maxTickets);
         setSelectedTickets(selected);
@@ -71,25 +84,10 @@ const TicketPicker: React.FC = () => {
             navigate('/registration', { state: { tickets: selected, code } });
         }, 1500);
         return () => clearTimeout(timer);
-    }, [type, totalTickets, takenNumbers]);
-
-    // Random con datos ya cargados desde el inicio
-    useEffect(() => {
-        if (type !== 'random') return;
-        const available = allTickets.filter(n => !takenNumbers.has(n));
-        const shuffled = [...available].sort(() => 0.5 - Math.random());
-        const selected = shuffled.slice(0, maxTickets);
-        setSelectedTickets(selected);
-        const timer = setTimeout(() => {
-            navigate('/registration', { state: { tickets: selected, code } });
-        }, 1500);
-        return () => clearTimeout(timer);
-        // Solo cuando type es random y la primera vez
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [type]);
+    }, [type, totalTickets, takenData, code, navigate, maxTickets, allTickets]);
 
     const toggleTicket = (number: string) => {
-        if (takenNumbers.has(number)) return;
+        if (takenData.has(number)) return;
         if (selectedTickets.includes(number)) {
             setSelectedTickets(selectedTickets.filter(t => t !== number));
         } else if (selectedTickets.length < maxTickets) {
@@ -114,7 +112,7 @@ const TicketPicker: React.FC = () => {
                 <div style={{ background: 'var(--primary-glow)', padding: '12px 16px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px', border: '1px solid rgba(255, 122, 0, 0.1)' }}>
                     <Info size={18} color="var(--primary)" />
                     <p style={{ fontSize: '14px', fontWeight: 700, color: 'var(--primary)', margin: 0 }}>
-                        Puedes seleccionar {maxTickets} boletos gratis · 🍗 = ocupado
+                        Selecciona {maxTickets} boletos para tu registro oficial.
                     </p>
                 </div>
 
@@ -132,52 +130,64 @@ const TicketPicker: React.FC = () => {
             </div>
 
             {/* Grid de boletos */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(65px, 1fr))', gap: '10px', paddingBottom: '120px' }}>
+            <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: '8px', paddingBottom: '120px' }}>
                 {filteredTickets.map(number => {
                     const isSelected = selectedTickets.includes(number);
-                    const isTaken = takenNumbers.has(number);
+                    const ownerName = takenData.get(number);
+                    const isTaken = !!ownerName;
                     const isFull = selectedTickets.length >= maxTickets && !isSelected;
                     const isDisabled = isTaken || (isFull && !isSelected);
 
                     return (
                         <motion.button
                             key={number}
-                            whileTap={!isDisabled ? { scale: 0.9 } : {}}
+                            whileTap={!isDisabled ? { scale: 0.92 } : {}}
                             onClick={() => toggleTicket(number)}
                             disabled={isDisabled}
                             style={{
-                                aspectRatio: '1/1',
-                                border: isTaken ? '2px solid #ffe0b2' : 'none',
-                                borderRadius: '16px',
+                                aspectRatio: '1.1/1',
+                                border: isTaken ? '1.5px solid #ffccbc' : isSelected ? '2px solid var(--primary)' : '1px solid #edf2f7',
+                                borderRadius: '14px',
                                 background: isTaken
-                                    ? '#fff8f0'
-                                    : isSelected ? 'var(--primary)' : '#f1f3f5',
-                                color: isTaken ? '#e67e22' : isSelected ? 'white' : isFull ? '#ced4da' : '#1a1a1a',
-                                fontSize: isTaken ? '14px' : '22px',
-                                fontWeight: 900,
+                                    ? '#fff5f2'
+                                    : isSelected ? 'var(--primary)' : '#f8fafc',
+                                color: isTaken ? '#d84315' : isSelected ? 'white' : isFull ? '#cbd5e0' : '#2d3748',
                                 cursor: isDisabled ? 'not-allowed' : 'pointer',
-                                transition: 'all 0.2s ease',
+                                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                                 position: 'relative',
                                 display: 'flex',
                                 flexDirection: 'column',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                gap: '2px',
+                                padding: '6px 2px',
                                 boxShadow: isSelected ? '0 8px 16px var(--primary-glow)' : 'none',
                                 opacity: isFull && !isTaken ? 0.6 : 1,
                             }}
                         >
                             {isTaken ? (
                                 <>
-                                    <ChickenLeg />
-                                    <span style={{ fontSize: '10px', fontWeight: 700 }}>{number}</span>
+                                    <span style={{ fontSize: '14px', fontWeight: 900, marginBottom: '2px' }}>{number}</span>
+                                    <span style={{
+                                        fontSize: '7.5px',
+                                        fontWeight: 700,
+                                        lineHeight: 1,
+                                        textAlign: 'center',
+                                        maxWidth: '92%',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap',
+                                        textTransform: 'uppercase',
+                                        opacity: 0.9
+                                    }}>
+                                        {formatName(ownerName)}
+                                    </span>
                                 </>
                             ) : (
                                 <>
-                                    {number}
+                                    <span style={{ fontSize: '20px', fontWeight: 900 }}>{number}</span>
                                     {isSelected && (
-                                        <div style={{ position: 'absolute', top: '-4px', right: '-4px', background: 'white', borderRadius: '50%', color: 'var(--primary)', display: 'flex' }}>
-                                            <CheckCircle2 size={18} fill="white" />
+                                        <div style={{ position: 'absolute', top: '-5px', right: '-5px', background: 'white', borderRadius: '50%', color: 'var(--primary)', display: 'flex', boxShadow: '0 2px 5px rgba(0,0,0,0.1)' }}>
+                                            <CheckCircle2 size={16} fill="white" />
                                         </div>
                                     )}
                                 </>
