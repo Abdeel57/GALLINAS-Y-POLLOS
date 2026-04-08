@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { listPromoCodes, createPromoCode, deletePromoCode, validatePromoCode, redeemPromoCode } from '../controllers/promoCodes.controller';
+import { listPromoCodes, createPromoCode, deletePromoCode, validatePromoCode, redeemPromoCode } from '../controllers/promoCodes.controller.js';
 
 const router = Router();
 const SECRET = process.env.ADMIN_SECRET || 'pollos-admin-2024';

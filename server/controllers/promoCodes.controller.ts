@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import prisma from '../config/database';
+import prisma from '../config/database.js';
 
 export async function listPromoCodes(_req: Request, res: Response) {
     try {

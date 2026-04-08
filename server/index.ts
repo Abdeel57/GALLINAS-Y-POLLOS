@@ -1,12 +1,18 @@
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 import dotenv from 'dotenv';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 dotenv.config({ path: path.join(__dirname, '../.env') });
 
-import polleriaRoutes from './routes/polleria.routes';
-import promoCodesRoutes from './routes/promoCodes.routes';
-import { listPromoCodes, createPromoCode, deletePromoCode } from './controllers/promoCodes.controller';
+import polleriaRoutes from './routes/polleria.routes.js';
+import promoCodesRoutes from './routes/promoCodes.routes.js';
+import { listPromoCodes, createPromoCode, deletePromoCode } from './controllers/promoCodes.controller.js';
 
 const app = express();
 
