@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { LayoutDashboard, Ticket, Users, Link2, Plus, Copy, Check, LogOut, ShoppingBag, Edit2, X, Save, Menu } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import logo from '../assets/logo.png';
 
 interface AdminDashboardProps { onLogout?: () => void; }
 
@@ -100,8 +101,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                 padding: '16px 24px', background: 'white', borderBottom: '1px solid #eee',
                 position: 'sticky', top: 0, zIndex: 100, width: '100%'
             }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ width: '24px', height: '24px', background: 'var(--primary)', borderRadius: '6px' }} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{ width: '36px', height: '36px', borderRadius: '50%', overflow: 'hidden', flexShrink: 0, boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>
+                        <img src={logo} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 12%' }} />
+                    </div>
                     <h1 style={{ fontSize: '14px', fontWeight: 900, color: '#1a1a1a' }}>ADMIN</h1>
                 </div>
                 <button
@@ -133,8 +136,13 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                     position: 'fixed', height: '100vh', zIndex: 50
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '0 16px' }}>
-                        <div style={{ width: '32px', height: '32px', background: 'var(--primary)', borderRadius: '8px' }} />
-                        <h1 style={{ fontSize: '16px', fontWeight: 900 }}>ADMIN PANEL</h1>
+                        <div style={{ width: '52px', height: '52px', borderRadius: '50%', overflow: 'hidden', flexShrink: 0, boxShadow: '0 3px 12px rgba(0,0,0,0.18)' }}>
+                            <img src={logo} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 12%' }} />
+                        </div>
+                        <div>
+                            <h1 style={{ fontSize: '15px', fontWeight: 900, margin: 0 }}>Gallinas y Pollos</h1>
+                            <p style={{ fontSize: '11px', color: '#999', margin: 0, fontWeight: 500 }}>Panel de Control</p>
+                        </div>
                     </div>
                     <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
                         <NavItems />
