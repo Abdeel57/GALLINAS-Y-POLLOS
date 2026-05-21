@@ -73,7 +73,7 @@ const SuccessPage: React.FC = () => {
     const today = new Date().toLocaleDateString('es-PE', { year: 'numeric', month: 'long', day: 'numeric' });
 
     return (
-        <div style={{ padding: '24px', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#ffffff' }}>
+        <div style={{ padding: '24px', paddingBottom: 'calc(24px + env(safe-area-inset-bottom))', minHeight: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#ffffff' }}>
             <Confetti
                 width={windowSize.width}
                 height={windowSize.height}

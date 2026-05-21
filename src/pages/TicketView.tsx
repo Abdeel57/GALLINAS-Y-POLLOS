@@ -39,13 +39,14 @@ const TicketView: React.FC = () => {
 
     return (
         <div style={{
-            minHeight: '100vh',
+            minHeight: '100dvh',
             background: 'linear-gradient(135deg, #fff7f0 0%, #ffffff 50%, #f0f5ff 100%)',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
             padding: '24px',
+            paddingBottom: 'calc(24px + env(safe-area-inset-bottom))',
             fontFamily: 'Inter, system-ui, sans-serif'
         }}>
             {isValid ? (

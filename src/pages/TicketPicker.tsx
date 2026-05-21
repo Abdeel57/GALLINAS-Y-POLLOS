@@ -105,7 +105,7 @@ const TicketPicker: React.FC<TicketPickerProps> = ({ viewOnly = false }) => {
     const filteredTickets = allTickets.filter(t => t.includes(searchTerm));
 
     return (
-        <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: '#ffffff', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ height: '100dvh', display: 'flex', flexDirection: 'column', background: '#ffffff', position: 'relative', overflow: 'hidden' }}>
 
             {/* Header */}
             <div style={{ padding: '16px', background: 'white', borderBottom: '1px solid #f0f0f0', zIndex: 10, boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
@@ -150,7 +150,7 @@ const TicketPicker: React.FC<TicketPickerProps> = ({ viewOnly = false }) => {
             </div>
 
             {/* Grid de boletos */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: '8px', paddingBottom: '120px' }}>
+            <div style={{ flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch', padding: '16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(68px, 1fr))', gap: '8px', paddingBottom: 'calc(150px + env(safe-area-inset-bottom))' }}>
                 {filteredTickets.map(number => {
                     const isSelected = selectedTickets.includes(number);
                     const ownerName = takenData.get(number);
@@ -222,7 +222,7 @@ const TicketPicker: React.FC<TicketPickerProps> = ({ viewOnly = false }) => {
                 {selectedTickets.length > 0 && (
                     <motion.div
                         initial={{ y: 150 }} animate={{ y: 0 }} exit={{ y: 150 }}
-                        style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '24px', background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(20px)', borderTop: '1px solid #f0f0f0', display: 'flex', flexDirection: 'column', gap: '16px', zIndex: 100, boxShadow: '0 -10px 40px rgba(0,0,0,0.08)' }}
+                        style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '24px', paddingBottom: 'calc(24px + env(safe-area-inset-bottom))', background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(20px)', borderTop: '1px solid #f0f0f0', display: 'flex', flexDirection: 'column', gap: '16px', zIndex: 100, boxShadow: '0 -10px 40px rgba(0,0,0,0.08)' }}
                     >
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <span style={{ fontSize: '14px', fontWeight: 600, color: '#666' }}>

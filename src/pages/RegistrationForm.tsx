@@ -68,8 +68,9 @@ const RegistrationForm: React.FC = () => {
 
     return (
         <div style={{
-            minHeight: '100vh',
+            minHeight: '100dvh',
             padding: '24px',
+            paddingBottom: 'calc(24px + env(safe-area-inset-bottom))',
             display: 'flex',
             flexDirection: 'column',
             background: '#ffffff',
