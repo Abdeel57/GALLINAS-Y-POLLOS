@@ -174,8 +174,12 @@ export async function clearOrphanTickets(_req: Request, res: Response) {
 
 export async function resetAllOrders(_req: Request, res: Response) {
     try {
-        await prisma.polleriaTicket.deleteMany({});
-        res.json({ success: true, message: 'Todos los boletos han sido liberados.' });
+        // Liberar todos los boletos y eliminar todos los links de canje creados
+        await prisma.$transaction([
+            prisma.polleriaTicket.deleteMany({}),
+            prisma.promoCode.deleteMany({}),
+        ]);
+        res.json({ success: true, message: 'Todos los boletos han sido liberados y los links eliminados.' });
     } catch (err: any) {
         res.status(500).json({ success: false, error: err.message });
     }

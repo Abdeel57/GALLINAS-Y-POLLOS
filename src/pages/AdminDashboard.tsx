@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Ticket, Users, Link2, Plus, Copy, Check, LogOut, ShoppingBag, Edit2, X, Save, Menu, Trash2, Loader, Settings, Trophy, CalendarDays, Hash, RefreshCw } from 'lucide-react';
+import { LayoutDashboard, Ticket, Users, Link2, Plus, Copy, Check, LogOut, ShoppingBag, Edit2, X, Save, Menu, Trash2, Loader, Settings, Trophy, CalendarDays, Hash, RefreshCw, Eye } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import logo from '../assets/logo.png';
 
@@ -53,6 +53,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     useEffect(() => {
         if (activeTab === 'codes') loadCodes();
         if (activeTab === 'orders') loadOrders();
+        if (activeTab === 'dashboard') { loadOrders(); loadCodes(); loadConfig(); }
     }, [activeTab]);
 
     const handleCreateCode = async (e: React.FormEvent) => {
@@ -81,6 +82,15 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         try {
             await fetch(`${API}/actions/delete-v2/${id}`, { method: 'DELETE', headers: promoHeaders });
             setCodes(prev => prev.filter(c => c.id !== id));
+        } catch { /* noop */ }
+    };
+
+    const handleDeleteAllCodes = async () => {
+        if (codes.length === 0) return;
+        if (!confirm('¿Borrar TODOS los links de canje? Esto también liberará los boletos que se hayan canjeado con ellos.')) return;
+        try {
+            await fetch(`${API}/actions/delete-all-v2`, { method: 'DELETE', headers: promoHeaders });
+            setCodes([]);
         } catch { /* noop */ }
     };
 
@@ -132,8 +142,12 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     };
 
     // Stats
+    const soldCount = orders.reduce((sum, o) => sum + (o.tickets?.length || 0), 0);
+    const remainingCount = Math.max(config.totalTickets - soldCount, 0);
     const stats = [
         { label: 'Boletos Totales', value: config.totalTickets.toString(), icon: <Ticket /> },
+        { label: 'Boletos Vendidos', value: soldCount.toString(), icon: <ShoppingBag /> },
+        { label: 'Boletos Disponibles', value: remainingCount.toString(), icon: <Hash /> },
         { label: 'Participantes', value: orders.length.toString(), icon: <Users /> },
         { label: 'Links Activos', value: codes.filter(c => c.active).length.toString(), icon: <Link2 /> }
     ];
@@ -300,12 +314,34 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                 <div className="main-content" style={{ flex: 1, padding: '40px', marginLeft: '280px', width: '100%' }}>
                     {activeTab === 'dashboard' && (
                         <div>
-                            <header style={{ marginBottom: '40px' }}>
-                                <h2 style={{ fontSize: '28px', fontWeight: 900, color: '#1a1a1a' }}>Panel de Control</h2>
-                                <p style={{ color: '#666', marginTop: '4px' }}>Resumen de actividad</p>
+                            <header style={{ marginBottom: '40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+                                <div>
+                                    <h2 style={{ fontSize: '28px', fontWeight: 900, color: '#1a1a1a' }}>Panel de Control</h2>
+                                    <p style={{ color: '#666', marginTop: '4px' }}>Resumen de actividad</p>
+                                </div>
+                                <div style={{ display: 'flex', gap: '10px' }}>
+                                    <button
+                                        onClick={() => window.open('/ver', '_blank')}
+                                        className="btn-secondary"
+                                        style={{ padding: '10px 16px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}
+                                    >
+                                        <Eye size={16} /> VER PÁGINA PÚBLICA
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            navigator.clipboard.writeText(`${window.location.origin}/ver`);
+                                            setCopiedLink('__public__');
+                                            setTimeout(() => setCopiedLink(null), 2000);
+                                        }}
+                                        className="btn-secondary"
+                                        style={{ padding: '10px 16px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '8px', color: copiedLink === '__public__' ? '#27ae60' : undefined }}
+                                    >
+                                        {copiedLink === '__public__' ? <Check size={16} /> : <Copy size={16} />} COPIAR LINK
+                                    </button>
+                                </div>
                             </header>
 
-                            <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginBottom: '40px' }}>
+                            <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '20px', marginBottom: '40px' }}>
                                 {stats.map(s => (
                                     <div key={s.label} className="premium-card" style={{ background: 'white', border: 'none' }}>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -329,12 +365,13 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                 <div style={{ display: 'flex', gap: '10px' }}>
                                     <button
                                         onClick={async () => {
-                                            if (!confirm('¿CONFIRMAS BORRAR TODAS LAS ÓRDENES? Esto dejará todos los boletos libres de nuevo.')) return;
+                                            if (!confirm('¿CONFIRMAS BORRAR TODA LA RIFA? Esto liberará todos los boletos y eliminará TODOS los links de canje creados.')) return;
                                             try {
                                                 const res = await fetch(`${API}/api/polleria/orders/reset`, { method: 'DELETE', headers: adminHeaders });
                                                 if (res.ok) {
-                                                    alert('Sorteo reseteado correctamente.');
+                                                    alert('Rifa reseteada correctamente. Boletos liberados y links eliminados.');
                                                     loadOrders();
+                                                    loadCodes();
                                                 }
                                             } catch { alert('Error al resetear'); }
                                         }}
@@ -431,9 +468,20 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                     <h2 style={{ fontSize: '28px', fontWeight: 900 }}>Links de Canje</h2>
                                     <p style={{ color: '#666', marginTop: '4px' }}>Links de uso único para boletos gratis</p>
                                 </div>
-                                <button className="btn-primary" style={{ padding: '10px 18px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }} onClick={() => { setShowCreateForm(true); setCreateError(''); }}>
-                                    <Plus size={16} /> NUEVO
-                                </button>
+                                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                                    {codes.length > 0 && (
+                                        <button
+                                            className="btn-secondary"
+                                            style={{ padding: '10px 16px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px', color: '#c0392b', borderColor: '#fadbd8' }}
+                                            onClick={handleDeleteAllCodes}
+                                        >
+                                            <Trash2 size={16} /> BORRAR TODOS
+                                        </button>
+                                    )}
+                                    <button className="btn-primary" style={{ padding: '10px 18px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }} onClick={() => { setShowCreateForm(true); setCreateError(''); }}>
+                                        <Plus size={16} /> NUEVO
+                                    </button>
+                                </div>
                             </header>
 
                             {/* Formulario de creación */}

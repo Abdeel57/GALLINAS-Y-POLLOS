@@ -62,6 +62,20 @@ export async function deletePromoCode(req: Request, res: Response) {
     }
 }
 
+export async function deleteAllPromoCodes(_req: Request, res: Response) {
+    try {
+        await prisma.$transaction([
+            // 1. Liberar los boletos asociados a cualquier link de canje
+            prisma.polleriaTicket.deleteMany({ where: { promoCodeId: { not: null } } }),
+            // 2. Borrar todos los códigos promocionales
+            prisma.promoCode.deleteMany({}),
+        ]);
+        res.json({ success: true });
+    } catch (err: any) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+}
+
 export async function validatePromoCode(req: Request, res: Response) {
     try {
         const code = req.params.code.trim().toUpperCase();

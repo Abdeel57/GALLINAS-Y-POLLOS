@@ -12,7 +12,7 @@ dotenv.config({ path: path.join(__dirname, '../.env') });
 
 import polleriaRoutes from './routes/polleria.routes.js';
 import promoCodesRoutes from './routes/promoCodes.routes.js';
-import { listPromoCodes, createPromoCode, deletePromoCode } from './controllers/promoCodes.controller.js';
+import { listPromoCodes, createPromoCode, deletePromoCode, deleteAllPromoCodes } from './controllers/promoCodes.controller.js';
 
 const app = express();
 
@@ -55,6 +55,7 @@ const checkAdmin = (req: any, res: any, next: any) => {
 
 app.get('/actions/list-v2', checkAdmin, listPromoCodes);
 app.post('/actions/create-v2', checkAdmin, createPromoCode);
+app.delete('/actions/delete-all-v2', checkAdmin, deleteAllPromoCodes);
 app.delete('/actions/delete-v2/:id', checkAdmin, deletePromoCode);
 
 // API routes

@@ -1,22 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, ChevronLeft, Info, CheckCircle2 } from 'lucide-react';
+import { Search, ChevronLeft, Info, CheckCircle2, Eye } from 'lucide-react';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 
 
 
-const TicketPicker: React.FC = () => {
+interface TicketPickerProps { viewOnly?: boolean; }
+
+const TicketPicker: React.FC<TicketPickerProps> = ({ viewOnly = false }) => {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
-    const type = searchParams.get('type') || 'choose';
+    const type = viewOnly ? 'view' : (searchParams.get('type') || 'choose');
     const code = searchParams.get('code') || '';
 
     const [maxTickets, setMaxTickets] = useState(2);
     const [selectedTickets, setSelectedTickets] = useState<string[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [totalTickets, setTotalTickets] = useState(0);
+    const [config, setConfig] = useState<any>(null);
     // Cambiamos Set por Map para guardar { numero: nombre }
     const [takenData, setTakenData] = useState<Map<string, string>>(new Map());
 
@@ -32,7 +35,7 @@ const TicketPicker: React.FC = () => {
     useEffect(() => {
         fetch(`${API}/api/polleria/config`)
             .then(r => r.json())
-            .then(json => { if (json.success) setTotalTickets(json.data.totalTickets); })
+            .then(json => { if (json.success) { setTotalTickets(json.data.totalTickets); setConfig(json.data); } })
             .catch(() => { });
 
         fetch(`${API}/api/polleria/tickets`)
@@ -90,6 +93,7 @@ const TicketPicker: React.FC = () => {
     }, [type, totalTickets, takenData, code, navigate, maxTickets, allTickets]);
 
     const toggleTicket = (number: string) => {
+        if (viewOnly) return;
         if (takenData.has(number)) return;
         if (selectedTickets.includes(number)) {
             setSelectedTickets(selectedTickets.filter(t => t !== number));
@@ -106,18 +110,31 @@ const TicketPicker: React.FC = () => {
             {/* Header */}
             <div style={{ padding: '16px', background: 'white', borderBottom: '1px solid #f0f0f0', zIndex: 10, boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                    <button onClick={() => navigate('/')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex' }}>
-                        <ChevronLeft size={24} color="#1a1a1a" />
-                    </button>
-                    <h2 style={{ fontSize: '20px', fontWeight: 900, margin: 0, color: '#1a1a1a' }}>Elegir Boletos</h2>
+                    {!viewOnly && (
+                        <button onClick={() => navigate('/')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex' }}>
+                            <ChevronLeft size={24} color="#1a1a1a" />
+                        </button>
+                    )}
+                    <h2 style={{ fontSize: '20px', fontWeight: 900, margin: 0, color: '#1a1a1a' }}>
+                        {viewOnly ? (config?.prizeName || 'Boletos de la Rifa') : 'Elegir Boletos'}
+                    </h2>
                 </div>
 
-                <div style={{ background: 'var(--primary-glow)', padding: '12px 16px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px', border: '1px solid rgba(255, 122, 0, 0.1)' }}>
-                    <Info size={18} color="var(--primary)" />
-                    <p style={{ fontSize: '14px', fontWeight: 700, color: 'var(--primary)', margin: 0 }}>
-                        Selecciona {maxTickets} boletos para tu registro.
-                    </p>
-                </div>
+                {viewOnly ? (
+                    <div style={{ background: 'var(--primary-glow)', padding: '12px 16px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px', border: '1px solid rgba(255, 122, 0, 0.1)' }}>
+                        <Eye size={18} color="var(--primary)" />
+                        <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--primary)', margin: 0 }}>
+                            Vista informativa. {takenData.size} de {totalTickets} boletos apartados. Los boletos en rojo ya están ocupados.
+                        </p>
+                    </div>
+                ) : (
+                    <div style={{ background: 'var(--primary-glow)', padding: '12px 16px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px', border: '1px solid rgba(255, 122, 0, 0.1)' }}>
+                        <Info size={18} color="var(--primary)" />
+                        <p style={{ fontSize: '14px', fontWeight: 700, color: 'var(--primary)', margin: 0 }}>
+                            Selecciona {maxTickets} boletos para tu registro.
+                        </p>
+                    </div>
+                )}
 
                 <div style={{ position: 'relative' }}>
                     <Search style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#666' }} size={18} />
@@ -139,7 +156,7 @@ const TicketPicker: React.FC = () => {
                     const ownerName = takenData.get(number);
                     const isTaken = !!ownerName;
                     const isFull = selectedTickets.length >= maxTickets && !isSelected;
-                    const isDisabled = isTaken || (isFull && !isSelected);
+                    const isDisabled = viewOnly || isTaken || (isFull && !isSelected);
 
                     return (
                         <motion.button
@@ -155,7 +172,7 @@ const TicketPicker: React.FC = () => {
                                     ? '#fff5f2'
                                     : isSelected ? 'var(--primary)' : '#f8fafc',
                                 color: isTaken ? '#d84315' : isSelected ? 'white' : isFull ? '#cbd5e0' : '#2d3748',
-                                cursor: isDisabled ? 'not-allowed' : 'pointer',
+                                cursor: viewOnly ? 'default' : isDisabled ? 'not-allowed' : 'pointer',
                                 transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                                 position: 'relative',
                                 display: 'flex',
