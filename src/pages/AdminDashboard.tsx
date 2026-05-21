@@ -141,15 +141,18 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         } catch { setConfigError('Error de conexión'); } finally { setConfigSaving(false); }
     };
 
-    // Stats
-    const soldCount = orders.reduce((sum, o) => sum + (o.tickets?.length || 0), 0);
-    const remainingCount = Math.max(config.totalTickets - soldCount, 0);
+    // Stats — 1 pollo = 1 boleto
+    const claimedTickets = orders.reduce((sum, o) => sum + (o.tickets?.length || 0), 0); // boletos ya canjeados (con número elegido)
+    const pendingFromLinks = codes.reduce((sum, c) => sum + (c.ticketsCount || 0) * Math.max((c.maxUses || 0) - (c.uses || 0), 0), 0); // boletos vendidos en links aún sin canjear
+    const totalPollos = claimedTickets + pendingFromLinks; // total de pollos vendidos
+    const remainingCount = Math.max(config.totalTickets - totalPollos, 0);
     const stats = [
-        { label: 'Boletos Totales', value: config.totalTickets.toString(), icon: <Ticket /> },
-        { label: 'Boletos Vendidos', value: soldCount.toString(), icon: <ShoppingBag /> },
-        { label: 'Boletos Disponibles', value: remainingCount.toString(), icon: <Hash /> },
-        { label: 'Participantes', value: orders.length.toString(), icon: <Users /> },
-        { label: 'Links Activos', value: codes.filter(c => c.active).length.toString(), icon: <Link2 /> }
+        { label: 'Pollos Vendidos', value: totalPollos.toString(), icon: <ShoppingBag />, highlight: true },
+        { label: 'Boletos Apartados', value: claimedTickets.toString(), icon: <Ticket />, highlight: false },
+        { label: 'Pendientes por Canjear', value: pendingFromLinks.toString(), icon: <Link2 />, highlight: false },
+        { label: 'Boletos Disponibles', value: remainingCount.toString(), icon: <Hash />, highlight: false },
+        { label: 'Boletos Totales', value: config.totalTickets.toString(), icon: <Trophy />, highlight: false },
+        { label: 'Participantes', value: orders.length.toString(), icon: <Users />, highlight: false },
     ];
 
     const handleCopyLink = (code: string, count: number) => {
@@ -341,17 +344,21 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                 </div>
                             </header>
 
-                            <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '20px', marginBottom: '40px' }}>
+                            <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '20px', marginBottom: '16px' }}>
                                 {stats.map(s => (
-                                    <div key={s.label} className="premium-card" style={{ background: 'white', border: 'none' }}>
+                                    <div key={s.label} className="premium-card" style={{ background: s.highlight ? 'linear-gradient(135deg, var(--primary), var(--secondary))' : 'white', border: 'none' }}>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                            <div style={{ width: '32px', height: '32px', color: 'var(--primary)' }}>{s.icon}</div>
-                                            <span style={{ color: '#999', fontSize: '11px', fontWeight: 800, textTransform: 'uppercase' }}>{s.label}</span>
-                                            <div style={{ fontSize: '28px', fontWeight: 900 }}>{s.value}</div>
+                                            <div style={{ width: '32px', height: '32px', color: s.highlight ? 'white' : 'var(--primary)' }}>{s.icon}</div>
+                                            <span style={{ color: s.highlight ? 'rgba(255,255,255,0.9)' : '#999', fontSize: '11px', fontWeight: 800, textTransform: 'uppercase' }}>{s.label}</span>
+                                            <div style={{ fontSize: '28px', fontWeight: 900, color: s.highlight ? 'white' : '#1a1a1a' }}>{s.value}</div>
                                         </div>
                                     </div>
                                 ))}
                             </div>
+
+                            <p style={{ color: '#999', fontSize: '12px', marginBottom: '40px', lineHeight: 1.5 }}>
+                                <strong style={{ color: '#666' }}>Pollos Vendidos</strong> = boletos ya canjeados ({claimedTickets}) + boletos en links pendientes por canjear ({pendingFromLinks}). Cada pollo equivale a 1 boleto.
+                            </p>
                         </div>
                     )}
 
