@@ -17,9 +17,18 @@ export async function updateConfig(req: Request, res: Response) {
     try {
         const { prizeName, prizeImage, drawDate, totalTickets, showCountdown } = req.body;
         if (totalTickets !== undefined) {
-            const current = await prisma.polleriaConfig.findUnique({ where: { id: 'default' } });
-            if (current && Number(totalTickets) < current.totalTickets) {
-                return res.status(400).json({ success: false, error: `No puedes reducir boletos. Mínimo: ${current.totalTickets}` });
+            const newTotal = Number(totalTickets);
+            if (!Number.isFinite(newTotal) || newTotal < 1) {
+                return res.status(400).json({ success: false, error: 'El total de boletos debe ser al menos 1.' });
+            }
+            // Solo bloquear la reducción si hay boletos canjeados que quedarian fuera del nuevo rango
+            const tickets = await prisma.polleriaTicket.findMany({ select: { number: true } });
+            const outOfRange = tickets.filter((t: { number: string }) => parseInt(t.number, 10) >= newTotal);
+            if (outOfRange.length > 0) {
+                return res.status(400).json({
+                    success: false,
+                    error: `No se puede reducir a ${newTotal} boletos: hay ${outOfRange.length} boleto(s) canjeado(s) con número fuera de ese rango. Libera esos boletos o resetea la rifa primero.`,
+                });
             }
         }
         const data: any = { updatedAt: new Date() };

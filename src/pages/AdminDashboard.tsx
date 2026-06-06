@@ -100,7 +100,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     const [configSaving, setConfigSaving] = useState(false);
     const [configError, setConfigError] = useState('');
     const [configSuccess, setConfigSuccess] = useState(false);
-    const [minTickets, setMinTickets] = useState(100);
 
     const loadConfig = async () => {
         setConfigLoading(true);
@@ -116,7 +115,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                     totalTickets: d.totalTickets,
                     showCountdown: d.showCountdown !== false
                 });
-                setMinTickets(d.totalTickets);
             }
         } catch { /* noop */ } finally { setConfigLoading(false); }
     };
@@ -135,7 +133,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
             });
             const json = await res.json();
             if (!json.success) { setConfigError(json.error || 'Error al guardar'); return; }
-            setMinTickets(json.data.totalTickets);
             setConfigSuccess(true);
             setTimeout(() => setConfigSuccess(false), 3000);
         } catch { setConfigError('Error de conexión'); } finally { setConfigSaving(false); }
@@ -767,18 +764,17 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                         <div>
                                             <label style={{ fontSize: '11px', fontWeight: 800, color: '#999', textTransform: 'uppercase', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                                 <Hash size={14} /> Total de Boletos
-                                                <span style={{ fontSize: '10px', color: '#aaa', fontWeight: 500, marginLeft: '4px' }}>(mín. {minTickets})</span>
                                             </label>
                                             <input
                                                 required
                                                 type="number"
-                                                min={minTickets}
+                                                min={1}
                                                 className="glass-input"
                                                 style={{ background: '#f8f9fa', border: '1px solid #eee', color: '#1a1a1a', height: '50px' }}
                                                 value={config.totalTickets}
                                                 onChange={e => setConfig(c => ({ ...c, totalTickets: Number(e.target.value) }))}
                                             />
-                                            <p style={{ fontSize: '11px', color: '#aaa', marginTop: '6px' }}>Solo puedes aumentar la cantidad, no reducirla.</p>
+                                            <p style={{ fontSize: '11px', color: '#aaa', marginTop: '6px' }}>Puedes configurar cualquier cantidad. Si reduces y hay boletos canjeados con número fuera del nuevo rango, libéralos o resetea la rifa primero.</p>
                                         </div>
                                     </div>
 
