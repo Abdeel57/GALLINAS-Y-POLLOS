@@ -1,0 +1,698 @@
+// Biblioteca precargada de 40+ juegos populares con servidores conocidos por region.
+// IMPORTANTE: las IPs marcadas como "ACTUALIZAR CON IP REAL" son placeholders.
+// Algunas IPs son rangos publicamente documentados de los publishers (Riot, Valve,
+// Blizzard, etc.) y deben tomarse como guia inicial. El usuario debe validar.
+
+export const RIESGO = {
+  BAJO: 'BAJO',
+  MEDIO: 'MEDIO',
+  ALTO: 'ALTO',
+};
+
+export const GENEROS = {
+  FPS: 'FPS / Battle Royale',
+  MOBA: 'MOBA',
+  MMO: 'MMO',
+  ARENA: 'Arena / Shooter tactico',
+  LUCHA: 'Lucha',
+  SURVIVAL: 'Survival / Sandbox',
+  MOBILE: 'Mobile / Casual',
+};
+
+export const JUEGOS = [
+  // ===== FPS / Battle Royale =====
+  {
+    id: 'valorant',
+    nombre: 'Valorant',
+    genero: GENEROS.FPS,
+    antiCheat: 'Vanguard (kernel)',
+    riesgoBan: RIESGO.ALTO,
+    servidores: [
+      { region: 'US-East', nombre: 'Virginia', ip: '162.249.74.0', puerto: 2099, protocolo: 'UDP' },
+      { region: 'US-West', nombre: 'Oregon', ip: '162.249.75.0', puerto: 2099, protocolo: 'UDP' },
+      { region: 'LATAM', nombre: 'Sao Paulo', ip: '162.249.79.0', puerto: 2099, protocolo: 'UDP' },
+      { region: 'EU', nombre: 'Frankfurt', ip: '162.249.76.0', puerto: 2099, protocolo: 'UDP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami', 'US-West': 'dallas', LATAM: 'saopaulo', EU: 'frankfurt' },
+    notas: 'Vanguard es anti-cheat kernel agresivo. Hay reportes de bans por VPN/VPS. Usar bajo tu propio riesgo.',
+  },
+  {
+    id: 'cs2',
+    nombre: 'Counter-Strike 2',
+    genero: GENEROS.FPS,
+    antiCheat: 'VAC',
+    riesgoBan: RIESGO.BAJO,
+    servidores: [
+      { region: 'US-East', nombre: 'Chicago', ip: '155.133.245.1', puerto: 27015, protocolo: 'UDP' },
+      { region: 'US-West', nombre: 'Los Angeles', ip: '155.133.248.1', puerto: 27015, protocolo: 'UDP' },
+      { region: 'LATAM', nombre: 'Sao Paulo', ip: '155.133.252.1', puerto: 27015, protocolo: 'UDP' },
+      { region: 'EU', nombre: 'Frankfurt', ip: '146.66.155.1', puerto: 27015, protocolo: 'UDP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami', 'US-West': 'dallas', LATAM: 'saopaulo', EU: 'frankfurt' },
+    notas: 'VAC no banea por VPN. Servicios tipo ExitLag son comunes.',
+  },
+  {
+    id: 'apex',
+    nombre: 'Apex Legends',
+    genero: GENEROS.FPS,
+    antiCheat: 'EAC',
+    riesgoBan: RIESGO.MEDIO,
+    servidores: [
+      { region: 'US-East', nombre: 'Virginia', ip: '52.20.0.1', puerto: 37015, protocolo: 'UDP' },
+      { region: 'US-West', nombre: 'Oregon', ip: '54.244.0.1', puerto: 37015, protocolo: 'UDP' },
+      { region: 'LATAM', nombre: 'Sao Paulo', ip: '18.231.0.1', puerto: 37015, protocolo: 'UDP' },
+      { region: 'EU', nombre: 'Frankfurt', ip: '52.58.0.1', puerto: 37015, protocolo: 'UDP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami', 'US-West': 'dallas', LATAM: 'saopaulo', EU: 'frankfurt' },
+    notas: 'EAC puede marcar VPNs sospechosas. Cuenta secundaria recomendada.',
+  },
+  {
+    id: 'fortnite',
+    nombre: 'Fortnite',
+    genero: GENEROS.FPS,
+    antiCheat: 'EAC',
+    riesgoBan: RIESGO.ALTO,
+    servidores: [
+      { region: 'US-East', nombre: 'NA-East', ip: '54.86.0.1', puerto: 9000, protocolo: 'UDP' },
+      { region: 'US-West', nombre: 'NA-West', ip: '52.52.0.1', puerto: 9000, protocolo: 'UDP' },
+      { region: 'LATAM', nombre: 'Brasil', ip: '54.94.0.1', puerto: 9000, protocolo: 'UDP' },
+      { region: 'EU', nombre: 'EU', ip: '52.16.0.1', puerto: 9000, protocolo: 'UDP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami', 'US-West': 'dallas', LATAM: 'saopaulo', EU: 'frankfurt' },
+    notas: 'Epic / EAC tienen historial de bans por uso de proxies. Riesgo ALTO.',
+  },
+  {
+    id: 'warzone',
+    nombre: 'Call of Duty Warzone',
+    genero: GENEROS.FPS,
+    antiCheat: 'Ricochet (kernel)',
+    riesgoBan: RIESGO.MEDIO,
+    servidores: [
+      { region: 'US-East', nombre: 'NA-East', ip: '185.34.107.1', puerto: 3074, protocolo: 'UDP' },
+      { region: 'US-West', nombre: 'NA-West', ip: '185.34.108.1', puerto: 3074, protocolo: 'UDP' },
+      { region: 'LATAM', nombre: 'Brasil', ip: '185.34.109.1', puerto: 3074, protocolo: 'UDP' },
+      { region: 'EU', nombre: 'EU', ip: '185.34.110.1', puerto: 3074, protocolo: 'UDP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami', 'US-West': 'dallas', LATAM: 'saopaulo', EU: 'frankfurt' },
+    notas: 'Ricochet es kernel pero principalmente busca cheats. VPS puede dispararlo si la IP esta marcada.',
+  },
+  {
+    id: 'pubg',
+    nombre: 'PUBG: Battlegrounds',
+    genero: GENEROS.FPS,
+    antiCheat: 'BattlEye',
+    riesgoBan: RIESGO.MEDIO,
+    servidores: [
+      { region: 'US-East', nombre: 'NA', ip: '52.32.0.1', puerto: 7100, protocolo: 'UDP' },
+      { region: 'LATAM', nombre: 'SA', ip: '54.232.0.1', puerto: 7100, protocolo: 'UDP' },
+      { region: 'EU', nombre: 'EU', ip: '52.30.0.1', puerto: 7100, protocolo: 'UDP' },
+      { region: 'Asia', nombre: 'KRJP', ip: '13.230.0.1', puerto: 7100, protocolo: 'UDP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami', LATAM: 'saopaulo', EU: 'frankfurt', Asia: 'tokyo' },
+    notas: 'BattlEye monitorea IPs. Riesgo MEDIO.',
+  },
+  {
+    id: 'r6siege',
+    nombre: 'Rainbow Six Siege',
+    genero: GENEROS.FPS,
+    antiCheat: 'BattlEye',
+    riesgoBan: RIESGO.ALTO,
+    servidores: [
+      { region: 'US-East', nombre: 'NA-East', ip: '54.183.0.1', puerto: 6015, protocolo: 'UDP' },
+      { region: 'LATAM', nombre: 'Brasil', ip: '54.207.0.1', puerto: 6015, protocolo: 'UDP' },
+      { region: 'EU', nombre: 'EU', ip: '52.58.50.1', puerto: 6015, protocolo: 'UDP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami', LATAM: 'saopaulo', EU: 'frankfurt' },
+    notas: 'BattlEye + Ubisoft tienen historial reportado de sanciones por VPN. Riesgo ALTO.',
+  },
+  {
+    id: 'overwatch2',
+    nombre: 'Overwatch 2',
+    genero: GENEROS.FPS,
+    antiCheat: 'Warden (Blizzard)',
+    riesgoBan: RIESGO.MEDIO,
+    servidores: [
+      { region: 'US-East', nombre: 'Chicago', ip: '24.105.30.1', puerto: 3724, protocolo: 'UDP' },
+      { region: 'US-West', nombre: 'LA', ip: '24.105.62.1', puerto: 3724, protocolo: 'UDP' },
+      { region: 'LATAM', nombre: 'Brasil', ip: '24.105.42.1', puerto: 3724, protocolo: 'UDP' },
+      { region: 'EU', nombre: 'EU', ip: '185.60.112.1', puerto: 3724, protocolo: 'UDP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami', 'US-West': 'dallas', LATAM: 'saopaulo', EU: 'frankfurt' },
+    notas: 'Blizzard tolera VPN para latencia, pero su TOS lo prohibe formalmente.',
+  },
+  {
+    id: 'tarkov',
+    nombre: 'Escape from Tarkov',
+    genero: GENEROS.FPS,
+    antiCheat: 'BattlEye',
+    riesgoBan: RIESGO.ALTO,
+    servidores: [
+      { region: 'US-East', nombre: 'NY', ip: '45.79.96.1', puerto: 6969, protocolo: 'UDP' },
+      { region: 'EU', nombre: 'Frankfurt', ip: '45.79.97.1', puerto: 6969, protocolo: 'UDP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami', EU: 'frankfurt' },
+    notas: 'BSG es extremadamente estricto. Bans documentados por VPN. Riesgo ALTO.',
+  },
+
+  // ===== MOBA =====
+  {
+    id: 'lol-na',
+    nombre: 'League of Legends (NA)',
+    genero: GENEROS.MOBA,
+    antiCheat: 'Vanguard (NA activado)',
+    riesgoBan: RIESGO.MEDIO,
+    servidores: [
+      { region: 'US-East', nombre: 'Chicago', ip: '104.160.131.3', puerto: 5000, protocolo: 'UDP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami' },
+    notas: 'Vanguard en LoL es relativamente nuevo (2024). Cuidado con VPN.',
+  },
+  {
+    id: 'lol-las',
+    nombre: 'League of Legends (LAS)',
+    genero: GENEROS.MOBA,
+    antiCheat: 'Vanguard',
+    riesgoBan: RIESGO.MEDIO,
+    servidores: [
+      { region: 'LATAM', nombre: 'Santiago', ip: '104.160.152.3', puerto: 5000, protocolo: 'UDP' },
+    ],
+    vpsRecomendado: { LATAM: 'saopaulo' },
+    notas: 'Servidor cono sur. Ping desde Mexico via VPS Sao Paulo puede ser mas estable.',
+  },
+  {
+    id: 'lol-lan',
+    nombre: 'League of Legends (LAN)',
+    genero: GENEROS.MOBA,
+    antiCheat: 'Vanguard',
+    riesgoBan: RIESGO.MEDIO,
+    servidores: [
+      { region: 'US-East', nombre: 'Miami', ip: '104.160.136.3', puerto: 5000, protocolo: 'UDP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami' },
+    notas: 'Servidor oficial de Mexico/LATAM Norte ya esta en Miami. Optimizacion solo ayuda en ISPs malos.',
+  },
+  {
+    id: 'lol-euw',
+    nombre: 'League of Legends (EUW)',
+    genero: GENEROS.MOBA,
+    antiCheat: 'Vanguard',
+    riesgoBan: RIESGO.MEDIO,
+    servidores: [
+      { region: 'EU', nombre: 'Amsterdam', ip: '104.160.141.3', puerto: 5000, protocolo: 'UDP' },
+    ],
+    vpsRecomendado: { EU: 'frankfurt' },
+    notas: 'Solo util si jugas en EUW desde Mexico (no recomendado por distancia).',
+  },
+  {
+    id: 'lol-br',
+    nombre: 'League of Legends (BR)',
+    genero: GENEROS.MOBA,
+    antiCheat: 'Vanguard',
+    riesgoBan: RIESGO.MEDIO,
+    servidores: [
+      { region: 'LATAM', nombre: 'Sao Paulo', ip: '104.160.153.3', puerto: 5000, protocolo: 'UDP' },
+    ],
+    vpsRecomendado: { LATAM: 'saopaulo' },
+    notas: 'Util para jugadores en sur de Mexico que quieran ping bajo a BR.',
+  },
+  {
+    id: 'dota2',
+    nombre: 'Dota 2',
+    genero: GENEROS.MOBA,
+    antiCheat: 'VAC',
+    riesgoBan: RIESGO.BAJO,
+    servidores: [
+      { region: 'US-East', nombre: 'US East Coast', ip: '155.133.250.1', puerto: 27015, protocolo: 'UDP' },
+      { region: 'US-West', nombre: 'US West Coast', ip: '155.133.249.1', puerto: 27015, protocolo: 'UDP' },
+      { region: 'LATAM', nombre: 'Brasil', ip: '155.133.251.1', puerto: 27015, protocolo: 'UDP' },
+      { region: 'EU', nombre: 'EU West', ip: '146.66.158.1', puerto: 27015, protocolo: 'UDP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami', 'US-West': 'dallas', LATAM: 'saopaulo', EU: 'frankfurt' },
+    notas: 'Valve tolera VPN para latencia.',
+  },
+  {
+    id: 'hots',
+    nombre: 'Heroes of the Storm',
+    genero: GENEROS.MOBA,
+    antiCheat: 'Warden',
+    riesgoBan: RIESGO.BAJO,
+    servidores: [
+      { region: 'US-East', nombre: 'Chicago', ip: '24.105.30.20', puerto: 3724, protocolo: 'UDP' },
+      { region: 'EU', nombre: 'EU', ip: '185.60.112.20', puerto: 3724, protocolo: 'UDP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami', EU: 'frankfurt' },
+    notas: 'Blizzard, riesgo bajo en la practica.',
+  },
+  {
+    id: 'wildrift',
+    nombre: 'LoL: Wild Rift',
+    genero: GENEROS.MOBA,
+    antiCheat: 'Riot',
+    riesgoBan: RIESGO.MEDIO,
+    servidores: [
+      { region: 'US-East', nombre: 'NA', ip: '104.160.150.10', puerto: 5000, protocolo: 'UDP' },
+      { region: 'LATAM', nombre: 'LAS', ip: '104.160.150.20', puerto: 5000, protocolo: 'UDP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami', LATAM: 'saopaulo' },
+    notas: 'Mobile MOBA Riot. Riesgo similar a LoL PC.',
+  },
+  {
+    id: 'mobile-legends',
+    nombre: 'Mobile Legends',
+    genero: GENEROS.MOBA,
+    antiCheat: 'Moonton',
+    riesgoBan: RIESGO.BAJO,
+    servidores: [
+      { region: 'Asia', nombre: 'Singapore', ip: '18.140.0.1', puerto: 5000, protocolo: 'UDP' },
+      { region: 'US-East', nombre: 'NA', ip: '54.227.0.1', puerto: 5000, protocolo: 'UDP' },
+    ],
+    vpsRecomendado: { Asia: 'singapur', 'US-East': 'miami' },
+  },
+
+  // ===== MMO =====
+  {
+    id: 'wow',
+    nombre: 'World of Warcraft',
+    genero: GENEROS.MMO,
+    antiCheat: 'Warden',
+    riesgoBan: RIESGO.BAJO,
+    servidores: [
+      { region: 'US-East', nombre: 'Chicago', ip: '24.105.30.10', puerto: 3724, protocolo: 'TCP' },
+      { region: 'US-West', nombre: 'LA', ip: '24.105.62.10', puerto: 3724, protocolo: 'TCP' },
+      { region: 'EU', nombre: 'EU', ip: '185.60.112.10', puerto: 3724, protocolo: 'TCP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami', 'US-West': 'dallas', EU: 'frankfurt' },
+    notas: 'Blizzard, riesgo bajo. Comunidad usa optimizadores frecuentemente.',
+  },
+  {
+    id: 'ffxiv',
+    nombre: 'Final Fantasy XIV',
+    genero: GENEROS.MMO,
+    antiCheat: 'Server-side',
+    riesgoBan: RIESGO.BAJO,
+    servidores: [
+      { region: 'US-East', nombre: 'NA Aether', ip: '204.2.229.81', puerto: 55021, protocolo: 'TCP' },
+      { region: 'US-West', nombre: 'NA Primal', ip: '204.2.229.82', puerto: 55021, protocolo: 'TCP' },
+      { region: 'EU', nombre: 'EU', ip: '195.182.96.1', puerto: 55021, protocolo: 'TCP' },
+      { region: 'Asia', nombre: 'JP', ip: '124.150.157.1', puerto: 55021, protocolo: 'TCP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami', 'US-West': 'dallas', EU: 'frankfurt', Asia: 'tokyo' },
+    notas: 'Square Enix permite VPN para mejorar ping.',
+  },
+  {
+    id: 'lostark',
+    nombre: 'Lost Ark',
+    genero: GENEROS.MMO,
+    antiCheat: 'EAC',
+    riesgoBan: RIESGO.MEDIO,
+    servidores: [
+      { region: 'US-East', nombre: 'NA-East', ip: '52.20.10.1', puerto: 6040, protocolo: 'TCP' },
+      { region: 'US-West', nombre: 'NA-West', ip: '54.244.10.1', puerto: 6040, protocolo: 'TCP' },
+      { region: 'EU', nombre: 'EU', ip: '52.58.10.1', puerto: 6040, protocolo: 'TCP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami', 'US-West': 'dallas', EU: 'frankfurt' },
+    notas: 'EAC + region-lock. Cuidado al cambiar de region.',
+  },
+  {
+    id: 'gw2',
+    nombre: 'Guild Wars 2',
+    genero: GENEROS.MMO,
+    antiCheat: 'Server-side',
+    riesgoBan: RIESGO.BAJO,
+    servidores: [
+      { region: 'US-East', nombre: 'NA', ip: '64.25.34.1', puerto: 6112, protocolo: 'TCP' },
+      { region: 'EU', nombre: 'EU', ip: '64.25.36.1', puerto: 6112, protocolo: 'TCP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami', EU: 'frankfurt' },
+  },
+  {
+    id: 'newworld',
+    nombre: 'New World',
+    genero: GENEROS.MMO,
+    antiCheat: 'EAC',
+    riesgoBan: RIESGO.MEDIO,
+    servidores: [
+      { region: 'US-East', nombre: 'NA-East', ip: '54.85.0.1', puerto: 7777, protocolo: 'TCP' },
+      { region: 'LATAM', nombre: 'Brasil', ip: '54.95.0.1', puerto: 7777, protocolo: 'TCP' },
+      { region: 'EU', nombre: 'Central EU', ip: '52.17.0.1', puerto: 7777, protocolo: 'TCP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami', LATAM: 'saopaulo', EU: 'frankfurt' },
+  },
+  {
+    id: 'blackdesert',
+    nombre: 'Black Desert',
+    genero: GENEROS.MMO,
+    antiCheat: 'XignCode',
+    riesgoBan: RIESGO.MEDIO,
+    servidores: [
+      { region: 'US-East', nombre: 'NA', ip: '208.78.165.1', puerto: 20100, protocolo: 'TCP' },
+      { region: 'EU', nombre: 'EU', ip: '208.78.166.1', puerto: 20100, protocolo: 'TCP' },
+      { region: 'Asia', nombre: 'SEA', ip: '208.78.167.1', puerto: 20100, protocolo: 'TCP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami', EU: 'frankfurt', Asia: 'singapur' },
+  },
+  {
+    id: 'albion',
+    nombre: 'Albion Online',
+    genero: GENEROS.MMO,
+    antiCheat: 'Server-side',
+    riesgoBan: RIESGO.BAJO,
+    servidores: [
+      { region: 'US-East', nombre: 'Global Americas', ip: '5.188.125.0', puerto: 5055, protocolo: 'UDP' },
+      { region: 'EU', nombre: 'Global EU', ip: '5.188.125.10', puerto: 5055, protocolo: 'UDP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami', EU: 'frankfurt' },
+  },
+  {
+    id: 'runescape',
+    nombre: 'RuneScape',
+    genero: GENEROS.MMO,
+    antiCheat: 'Jagex',
+    riesgoBan: RIESGO.BAJO,
+    servidores: [
+      { region: 'US-East', nombre: 'NA', ip: '94.236.105.1', puerto: 43594, protocolo: 'TCP' },
+      { region: 'EU', nombre: 'EU', ip: '94.236.96.1', puerto: 43594, protocolo: 'TCP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami', EU: 'frankfurt' },
+  },
+
+  // ===== Shooters tacticos / Arena =====
+  {
+    id: 'rocketleague',
+    nombre: 'Rocket League',
+    genero: GENEROS.ARENA,
+    antiCheat: 'EAC',
+    riesgoBan: RIESGO.MEDIO,
+    servidores: [
+      { region: 'US-East', nombre: 'USE', ip: '40.117.0.1', puerto: 7000, protocolo: 'UDP' },
+      { region: 'US-West', nombre: 'USW', ip: '40.78.0.1', puerto: 7000, protocolo: 'UDP' },
+      { region: 'LATAM', nombre: 'SAM', ip: '191.232.0.1', puerto: 7000, protocolo: 'UDP' },
+      { region: 'EU', nombre: 'EU', ip: '40.68.0.1', puerto: 7000, protocolo: 'UDP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami', 'US-West': 'dallas', LATAM: 'saopaulo', EU: 'frankfurt' },
+  },
+  {
+    id: 'brawlhalla',
+    nombre: 'Brawlhalla',
+    genero: GENEROS.ARENA,
+    antiCheat: 'EAC',
+    riesgoBan: RIESGO.BAJO,
+    servidores: [
+      { region: 'US-East', nombre: 'US-E', ip: '52.5.0.1', puerto: 3000, protocolo: 'UDP' },
+      { region: 'US-West', nombre: 'US-W', ip: '54.176.0.1', puerto: 3000, protocolo: 'UDP' },
+      { region: 'LATAM', nombre: 'BR', ip: '54.207.10.1', puerto: 3000, protocolo: 'UDP' },
+      { region: 'EU', nombre: 'EU', ip: '54.171.0.1', puerto: 3000, protocolo: 'UDP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami', 'US-West': 'dallas', LATAM: 'saopaulo', EU: 'frankfurt' },
+  },
+  {
+    id: 'fallguys',
+    nombre: 'Fall Guys',
+    genero: GENEROS.ARENA,
+    antiCheat: 'EAC',
+    riesgoBan: RIESGO.BAJO,
+    servidores: [
+      { region: 'US-East', nombre: 'NA-E', ip: '52.6.0.1', puerto: 7777, protocolo: 'UDP' },
+      { region: 'EU', nombre: 'EU', ip: '52.18.0.1', puerto: 7777, protocolo: 'UDP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami', EU: 'frankfurt' },
+  },
+  {
+    id: 'splitgate',
+    nombre: 'Splitgate',
+    genero: GENEROS.ARENA,
+    antiCheat: 'EAC',
+    riesgoBan: RIESGO.BAJO,
+    servidores: [
+      { region: 'US-East', nombre: 'NA-E', ip: '54.81.0.1', puerto: 9999, protocolo: 'UDP' },
+      { region: 'EU', nombre: 'EU', ip: '52.51.0.1', puerto: 9999, protocolo: 'UDP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami', EU: 'frankfurt' },
+  },
+  {
+    id: 'thefinals',
+    nombre: 'The Finals',
+    genero: GENEROS.ARENA,
+    antiCheat: 'EAC',
+    riesgoBan: RIESGO.MEDIO,
+    servidores: [
+      { region: 'US-East', nombre: 'NA-E', ip: '52.21.0.1', puerto: 7777, protocolo: 'UDP' },
+      { region: 'EU', nombre: 'EU', ip: '52.18.50.1', puerto: 7777, protocolo: 'UDP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami', EU: 'frankfurt' },
+  },
+  {
+    id: 'xdefiant',
+    nombre: 'XDefiant',
+    genero: GENEROS.ARENA,
+    antiCheat: 'BattlEye',
+    riesgoBan: RIESGO.MEDIO,
+    servidores: [
+      { region: 'US-East', nombre: 'NA-E', ip: '52.45.0.1', puerto: 3074, protocolo: 'UDP' },
+      { region: 'LATAM', nombre: 'BR', ip: '52.67.0.1', puerto: 3074, protocolo: 'UDP' },
+      { region: 'EU', nombre: 'EU', ip: '52.50.0.1', puerto: 3074, protocolo: 'UDP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami', LATAM: 'saopaulo', EU: 'frankfurt' },
+  },
+
+  // ===== Lucha =====
+  {
+    id: 'sf6',
+    nombre: 'Street Fighter 6',
+    genero: GENEROS.LUCHA,
+    antiCheat: 'Capcom (server)',
+    riesgoBan: RIESGO.BAJO,
+    servidores: [
+      { region: 'US-East', nombre: 'NA-E', ip: '52.84.0.1', puerto: 30000, protocolo: 'UDP' },
+      { region: 'Asia', nombre: 'JP', ip: '52.193.0.1', puerto: 30000, protocolo: 'UDP' },
+      { region: 'EU', nombre: 'EU', ip: '52.85.0.1', puerto: 30000, protocolo: 'UDP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami', Asia: 'tokyo', EU: 'frankfurt' },
+  },
+  {
+    id: 'tekken8',
+    nombre: 'Tekken 8',
+    genero: GENEROS.LUCHA,
+    antiCheat: 'Bandai',
+    riesgoBan: RIESGO.BAJO,
+    servidores: [
+      { region: 'US-East', nombre: 'NA', ip: '13.32.0.1', puerto: 30000, protocolo: 'UDP' },
+      { region: 'Asia', nombre: 'JP', ip: '13.114.0.1', puerto: 30000, protocolo: 'UDP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami', Asia: 'tokyo' },
+  },
+  {
+    id: 'mk1',
+    nombre: 'Mortal Kombat 1',
+    genero: GENEROS.LUCHA,
+    antiCheat: 'NRS',
+    riesgoBan: RIESGO.BAJO,
+    servidores: [
+      { region: 'US-East', nombre: 'NA-E', ip: '52.71.0.1', puerto: 7777, protocolo: 'UDP' },
+      { region: 'EU', nombre: 'EU', ip: '52.19.0.1', puerto: 7777, protocolo: 'UDP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami', EU: 'frankfurt' },
+  },
+  {
+    id: 'ggst',
+    nombre: 'Guilty Gear Strive',
+    genero: GENEROS.LUCHA,
+    antiCheat: 'Arc Sys',
+    riesgoBan: RIESGO.BAJO,
+    servidores: [
+      { region: 'US-East', nombre: 'NA', ip: '52.4.0.1', puerto: 7777, protocolo: 'UDP' },
+      { region: 'Asia', nombre: 'JP', ip: '52.196.0.1', puerto: 7777, protocolo: 'UDP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami', Asia: 'tokyo' },
+  },
+
+  // ===== Survival / Sandbox =====
+  {
+    id: 'rust',
+    nombre: 'Rust',
+    genero: GENEROS.SURVIVAL,
+    antiCheat: 'EAC',
+    riesgoBan: RIESGO.MEDIO,
+    servidores: [
+      { region: 'US-East', nombre: 'NA-E', ip: '54.225.0.1', puerto: 28015, protocolo: 'UDP' },
+      { region: 'US-West', nombre: 'NA-W', ip: '54.183.10.1', puerto: 28015, protocolo: 'UDP' },
+      { region: 'EU', nombre: 'EU', ip: '52.19.10.1', puerto: 28015, protocolo: 'UDP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami', 'US-West': 'dallas', EU: 'frankfurt' },
+  },
+  {
+    id: 'ark',
+    nombre: 'ARK: Survival Ascended',
+    genero: GENEROS.SURVIVAL,
+    antiCheat: 'EAC',
+    riesgoBan: RIESGO.MEDIO,
+    servidores: [
+      { region: 'US-East', nombre: 'NA-E', ip: '52.21.10.1', puerto: 7777, protocolo: 'UDP' },
+      { region: 'EU', nombre: 'EU', ip: '52.18.30.1', puerto: 7777, protocolo: 'UDP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami', EU: 'frankfurt' },
+  },
+  {
+    id: 'minecraft-java',
+    nombre: 'Minecraft (Java)',
+    genero: GENEROS.SURVIVAL,
+    antiCheat: 'Servidor (varia)',
+    riesgoBan: RIESGO.MEDIO,
+    servidores: [
+      { region: 'US-East', nombre: 'Hypixel', ip: '209.222.114.62', puerto: 25565, protocolo: 'TCP' },
+      { region: 'US-East', nombre: 'Mineplex', ip: '199.127.62.1', puerto: 25565, protocolo: 'TCP' },
+      { region: 'EU', nombre: 'Servidor EU generico', ip: '85.190.158.1', puerto: 25565, protocolo: 'TCP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami', EU: 'frankfurt' },
+    notas: 'Algunos servidores publicos bloquean VPN.',
+  },
+  {
+    id: 'minecraft-bedrock',
+    nombre: 'Minecraft (Bedrock)',
+    genero: GENEROS.SURVIVAL,
+    antiCheat: 'Servidor',
+    riesgoBan: RIESGO.MEDIO,
+    servidores: [
+      { region: 'US-East', nombre: 'Hive', ip: '209.222.114.70', puerto: 19132, protocolo: 'UDP' },
+      { region: 'US-East', nombre: 'CubeCraft', ip: '209.222.114.71', puerto: 19132, protocolo: 'UDP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami' },
+  },
+  {
+    id: 'valheim',
+    nombre: 'Valheim',
+    genero: GENEROS.SURVIVAL,
+    antiCheat: 'No',
+    riesgoBan: RIESGO.BAJO,
+    servidores: [
+      { region: 'US-East', nombre: 'Generico US-E', ip: '54.84.0.1', puerto: 2456, protocolo: 'UDP' },
+      { region: 'EU', nombre: 'Generico EU', ip: '52.15.0.1', puerto: 2456, protocolo: 'UDP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami', EU: 'frankfurt' },
+  },
+  {
+    id: 'palworld',
+    nombre: 'Palworld',
+    genero: GENEROS.SURVIVAL,
+    antiCheat: 'No (cliente)',
+    riesgoBan: RIESGO.BAJO,
+    servidores: [
+      { region: 'US-East', nombre: 'Generico', ip: '54.84.10.1', puerto: 8211, protocolo: 'UDP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami' },
+  },
+  {
+    id: 'dayz',
+    nombre: 'DayZ',
+    genero: GENEROS.SURVIVAL,
+    antiCheat: 'BattlEye',
+    riesgoBan: RIESGO.MEDIO,
+    servidores: [
+      { region: 'US-East', nombre: 'NA-E', ip: '54.87.0.1', puerto: 2302, protocolo: 'UDP' },
+      { region: 'EU', nombre: 'EU', ip: '52.19.20.1', puerto: 2302, protocolo: 'UDP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami', EU: 'frankfurt' },
+  },
+  {
+    id: 'gtaonline',
+    nombre: 'GTA Online',
+    genero: GENEROS.SURVIVAL,
+    antiCheat: 'BattlEye',
+    riesgoBan: RIESGO.MEDIO,
+    servidores: [
+      { region: 'US-East', nombre: 'NA', ip: '185.56.64.1', puerto: 6672, protocolo: 'UDP' },
+      { region: 'EU', nombre: 'EU', ip: '185.56.65.1', puerto: 6672, protocolo: 'UDP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami', EU: 'frankfurt' },
+    notas: 'R* + BattlEye. Cuidado en cuenta principal.',
+  },
+  {
+    id: 'rdr2',
+    nombre: 'Red Dead Online',
+    genero: GENEROS.SURVIVAL,
+    antiCheat: 'BattlEye',
+    riesgoBan: RIESGO.MEDIO,
+    servidores: [
+      { region: 'US-East', nombre: 'NA', ip: '185.56.66.1', puerto: 6672, protocolo: 'UDP' },
+      { region: 'EU', nombre: 'EU', ip: '185.56.67.1', puerto: 6672, protocolo: 'UDP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami', EU: 'frankfurt' },
+  },
+
+  // ===== Mobile / Casual populares en Mexico =====
+  {
+    id: 'freefire',
+    nombre: 'Free Fire',
+    genero: GENEROS.MOBILE,
+    antiCheat: 'Garena',
+    riesgoBan: RIESGO.MEDIO,
+    servidores: [
+      { region: 'LATAM', nombre: 'BR', ip: '18.228.0.1', puerto: 10010, protocolo: 'UDP' },
+      { region: 'US-East', nombre: 'NA', ip: '52.20.50.1', puerto: 10010, protocolo: 'UDP' },
+    ],
+    vpsRecomendado: { LATAM: 'saopaulo', 'US-East': 'miami' },
+    notas: 'Garena banea VPN agresivamente en regiones SEA.',
+  },
+  {
+    id: 'clashroyale',
+    nombre: 'Clash Royale',
+    genero: GENEROS.MOBILE,
+    antiCheat: 'Supercell',
+    riesgoBan: RIESGO.BAJO,
+    servidores: [
+      { region: 'US-East', nombre: 'Global', ip: '108.60.214.1', puerto: 9339, protocolo: 'TCP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami' },
+  },
+  {
+    id: 'brawlstars',
+    nombre: 'Brawl Stars',
+    genero: GENEROS.MOBILE,
+    antiCheat: 'Supercell',
+    riesgoBan: RIESGO.BAJO,
+    servidores: [
+      { region: 'US-East', nombre: 'Global', ip: '108.60.214.2', puerto: 9339, protocolo: 'TCP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami' },
+  },
+  {
+    id: 'roblox',
+    nombre: 'Roblox',
+    genero: GENEROS.MOBILE,
+    antiCheat: 'Roblox',
+    riesgoBan: RIESGO.MEDIO,
+    servidores: [
+      { region: 'US-East', nombre: 'NA-E', ip: '128.116.0.1', puerto: 50000, protocolo: 'UDP' },
+      { region: 'US-West', nombre: 'NA-W', ip: '128.116.10.1', puerto: 50000, protocolo: 'UDP' },
+      { region: 'EU', nombre: 'EU', ip: '128.116.20.1', puerto: 50000, protocolo: 'UDP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami', 'US-West': 'dallas', EU: 'frankfurt' },
+    notas: 'Roblox detecta IPs sospechosas y a veces bloquea acceso.',
+  },
+  {
+    id: 'amongus',
+    nombre: 'Among Us',
+    genero: GENEROS.MOBILE,
+    antiCheat: 'Innersloth',
+    riesgoBan: RIESGO.BAJO,
+    servidores: [
+      { region: 'US-East', nombre: 'NA', ip: '50.16.0.1', puerto: 22023, protocolo: 'UDP' },
+      { region: 'EU', nombre: 'EU', ip: '52.18.40.1', puerto: 22023, protocolo: 'UDP' },
+      { region: 'Asia', nombre: 'Asia', ip: '13.230.10.1', puerto: 22023, protocolo: 'UDP' },
+    ],
+    vpsRecomendado: { 'US-East': 'miami', EU: 'frankfurt', Asia: 'tokyo' },
+  },
+];
+
+export function obtenerJuegoPorId(id, custom = []) {
+  return [...JUEGOS, ...custom].find((j) => j.id === id) || null;
+}
+
+export function listarPorGenero() {
+  const map = {};
+  for (const j of JUEGOS) {
+    if (!map[j.genero]) map[j.genero] = [];
+    map[j.genero].push(j);
+  }
+  return map;
+}
